@@ -208,7 +208,7 @@ export const CAMPAIGNS: Campaign[] = [
     organizerName: 'Nepal Health Sewa Team',
     organizerAddress: 'Ghantaghar, Birgunj, Parsa, Nepal',
     organizerPhone: '+977 9845012345',
-    organizerEmail: 'nepalhealthsewa@gmail.com',
+    organizerEmail: 'Nepalhealthsewa@gmail.com',
     status: 'Upcoming'
   },
   {

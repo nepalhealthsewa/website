@@ -6,6 +6,8 @@ describe('Operations Dashboard & Features Integration', () => {
   it('covers all standard ABO and Rh blood groups with initial donors data', () => {
     const bloodGroups: BloodGroup[] = ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'];
     const groupsInData = new Set(INITIAL_DONORS.map((d) => d.bloodGroup));
+    expect(bloodGroups.length).toBe(8);
+    expect(groupsInData.size).toBeGreaterThan(3);
 
     expect(INITIAL_DONORS.length).toBeGreaterThan(0);
     // Verified donors should have contact numbers and district

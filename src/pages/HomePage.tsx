@@ -11,9 +11,7 @@ import {
   MapPin,
   ArrowRight,
   Users,
-  Award,
   CheckCircle2,
-  Sparkles,
 } from 'lucide-react';
 import { useGetCampaignsQuery, useGetDonorsQuery } from '../services/healthApi';
 import { Button } from '../components/ui/Button';

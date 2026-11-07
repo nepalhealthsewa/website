@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Users, Droplet, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
 import { useGetCampaignsQuery } from '../services/healthApi';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';

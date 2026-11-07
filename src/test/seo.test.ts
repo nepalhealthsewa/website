@@ -17,8 +17,21 @@ describe('SEO & Schema.org JSON-LD Metadata Verification', () => {
     expect(metadata.socialMedia.linkedin).toBe('https://www.linkedin.com/in/nepalhealthsewa');
     expect(metadata.socialMedia.github).toBe('https://github.com/nepalhealthsewa');
 
+    expect(metadata.website).toBe('https://nepalhealthsewa.com');
+    expect(metadata.websites).toEqual(
+      expect.arrayContaining([
+        'https://nepalhealthsewa.com',
+        'https://nepalhealthsewa.netlify.app',
+        'https://nepalhealthsewa.pages.dev',
+      ])
+    );
+    expect(metadata.email).toBe('Nepalhealthsewa@gmail.com');
+
     expect(metadata.sameAs).toEqual(
       expect.arrayContaining([
+        'https://nepalhealthsewa.com',
+        'https://nepalhealthsewa.netlify.app',
+        'https://nepalhealthsewa.pages.dev',
         'https://www.facebook.com/nepalhealthsewa',
         'https://www.instagram.com/nepalhealthsewa',
         'https://www.youtube.com/@nepalhealthsewa',
@@ -48,8 +61,13 @@ describe('SEO & Schema.org JSON-LD Metadata Verification', () => {
 
       const org = parsed['@graph'].find((item: { '@type': string }) => item['@type'] === 'MedicalOrganization');
       expect(org).toBeDefined();
+      expect(org.url).toBe('https://nepalhealthsewa.com/');
+      expect(org.email).toBe('Nepalhealthsewa@gmail.com');
       expect(org.sameAs).toEqual(
         expect.arrayContaining([
+          'https://nepalhealthsewa.com',
+          'https://nepalhealthsewa.netlify.app',
+          'https://nepalhealthsewa.pages.dev',
           'https://www.facebook.com/nepalhealthsewa',
           'https://www.instagram.com/nepalhealthsewa',
           'https://www.youtube.com/@nepalhealthsewa',

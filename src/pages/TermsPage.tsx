@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, AlertTriangle, FileText } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { SEO } from '../components/common/SEO';
 

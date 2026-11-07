@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Heart,
-  Droplet,
   ShieldCheck,
   Users,
   MapPin,

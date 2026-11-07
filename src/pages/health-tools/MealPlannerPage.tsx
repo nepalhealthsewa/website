@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Utensils,
-  Leaf,
-  Flame,
-  Info,
-  ShieldCheck,
-  CheckCircle,
-  Sparkles,
-} from 'lucide-react';
+import { Utensils, ShieldCheck } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { MealRecommendation } from '../../types';
 import { SEO } from '../../components/common/SEO';
@@ -18,7 +10,6 @@ type DietType = 'vegetarian' | 'non-vegetarian' | 'high-fiber-vegan';
 export const MealPlannerPage: React.FC = () => {
   const [goal, setGoal] = useState<DietaryGoal>('maintenance');
   const [dietType, setDietType] = useState<DietType>('vegetarian');
-  const [dailyCalorieTarget, setDailyCalorieTarget] = useState<number>(2000);
 
   // Dynamic Nepali meal plan database
   const getMealPlan = (currentGoal: DietaryGoal, currentDiet: DietType): MealRecommendation[] => {

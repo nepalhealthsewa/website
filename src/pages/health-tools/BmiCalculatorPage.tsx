@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calculator, RotateCcw, AlertCircle, Info, CheckCircle2 } from 'lucide-react';
+import { Calculator, RotateCcw, AlertCircle, Info } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';

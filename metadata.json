@@ -5,6 +5,13 @@
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ],
+  "website": "https://nepalhealthsewa.com",
+  "websites": [
+    "https://nepalhealthsewa.com",
+    "https://nepalhealthsewa.netlify.app",
+    "https://nepalhealthsewa.pages.dev"
+  ],
+  "email": "Nepalhealthsewa@gmail.com",
   "socialMedia": {
     "facebook": "https://www.facebook.com/nepalhealthsewa",
     "instagram": "https://www.instagram.com/nepalhealthsewa",
@@ -14,6 +21,9 @@
     "github": "https://github.com/nepalhealthsewa"
   },
   "sameAs": [
+    "https://nepalhealthsewa.com",
+    "https://nepalhealthsewa.netlify.app",
+    "https://nepalhealthsewa.pages.dev",
     "https://www.facebook.com/nepalhealthsewa",
     "https://www.instagram.com/nepalhealthsewa",
     "https://www.youtube.com/@nepalhealthsewa",

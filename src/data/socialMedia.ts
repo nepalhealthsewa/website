@@ -10,6 +10,43 @@ export interface SocialMediaPlatform {
 }
 
 export const SOCIAL_USERNAME = 'nepalhealthsewa';
+export const OFFICIAL_EMAIL = 'Nepalhealthsewa@gmail.com';
+
+export interface OfficialWebsite {
+  name: string;
+  label: string;
+  url: string;
+  domain: string;
+  isPrimary?: boolean;
+  description: string;
+}
+
+export const OFFICIAL_WEBSITES: OfficialWebsite[] = [
+  {
+    name: 'Official Web Portal',
+    label: 'nepalhealthsewa.com',
+    url: 'https://nepalhealthsewa.com',
+    domain: 'nepalhealthsewa.com',
+    isPrimary: true,
+    description: 'Primary custom domain and official web portal',
+  },
+  {
+    name: 'Netlify Production Mirror',
+    label: 'nepalhealthsewa.netlify.app',
+    url: 'https://nepalhealthsewa.netlify.app',
+    domain: 'nepalhealthsewa.netlify.app',
+    isPrimary: false,
+    description: 'High-availability Netlify production deployment',
+  },
+  {
+    name: 'Cloudflare Pages Mirror',
+    label: 'nepalhealthsewa.pages.dev',
+    url: 'https://nepalhealthsewa.pages.dev',
+    domain: 'nepalhealthsewa.pages.dev',
+    isPrimary: false,
+    description: 'Cloudflare Pages edge mirror for fast global loading',
+  },
+];
 
 export const OFFICIAL_SOCIAL_MEDIAS: SocialMediaPlatform[] = [
   {

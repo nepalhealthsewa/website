@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Droplet, PhoneCall, HeartPulse, MapPin, X } from 'lucide-react';
+import { PhoneCall, HeartPulse, MapPin, X } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { setMobileMenuOpen } from '../../store/slices/uiSlice';
 

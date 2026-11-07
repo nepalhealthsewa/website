@@ -4,7 +4,6 @@ import {
   Campaign,
   EmergencyTicket,
   DiseaseInfo,
-  BloodGroup,
   ContactInquiry,
   TeamMember,
   VolunteerProfile,

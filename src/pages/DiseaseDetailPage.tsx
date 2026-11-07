@@ -4,10 +4,7 @@ import {
   ArrowLeft,
   AlertTriangle,
   CheckCircle2,
-  ShieldAlert,
   Info,
-  Calendar,
-  BookOpen,
 } from 'lucide-react';
 import { useGetDiseaseBySlugQuery } from '../services/healthApi';
 import { Card } from '../components/ui/Card';

@@ -18,9 +18,7 @@ import {
   Bookmark,
   Share2,
   Clock,
-  ExternalLink,
   BookOpen,
-  ArrowRight,
   ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';

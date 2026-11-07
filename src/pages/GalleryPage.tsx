@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { GALLERY_IMAGES } from '../data/mockData';
-import { Card } from '../components/ui/Card';
 import { Modal } from '../components/ui/Modal';
-import { MapPin, Image as ImageIcon } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 
 export const GalleryPage: React.FC = () => {
@@ -92,7 +91,7 @@ export const GalleryPage: React.FC = () => {
           </p>
         </div>
         <a
-          href="mailto:nepalhealthsewa@gmail.com?subject=Community%20Gallery%20Submission"
+          href="mailto:Nepalhealthsewa@gmail.com?subject=Community%20Gallery%20Submission"
           className="px-4 py-2 bg-white text-slate-800 border border-slate-300 hover:bg-slate-100 rounded-xl text-xs font-bold shrink-0 transition-colors"
         >
           Email Photos

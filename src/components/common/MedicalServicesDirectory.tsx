@@ -13,16 +13,12 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  Filter,
-  Sparkles,
-  ExternalLink,
   Info,
-  SlidersHorizontal,
   Compass,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { MEDICAL_SERVICES_CONTACTS } from '../../data/medicalContactsData';
-import { MedicalRegion, MedicalServiceCategory, MedicalServiceContact } from '../../types';
+import { MedicalServiceCategory } from '../../types';
 
 const CATEGORY_CONFIG: Record<
   MedicalServiceCategory,

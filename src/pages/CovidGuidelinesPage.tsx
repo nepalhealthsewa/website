@@ -3,9 +3,6 @@ import {
   ShieldAlert,
   AlertTriangle,
   CheckCircle2,
-  HeartPulse,
-  PhoneCall,
-  Sparkles,
 } from 'lucide-react';
 import { COVID_GUIDELINES } from '../data/mockData';
 import { Card } from '../components/ui/Card';

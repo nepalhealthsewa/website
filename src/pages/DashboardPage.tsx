@@ -1,52 +1,33 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Activity,
   Droplet,
   AlertTriangle,
   Calendar,
   Search,
-  Filter,
   Plus,
   Phone,
   MapPin,
   Clock,
-  CheckCircle2,
-  XCircle,
   FileSpreadsheet,
   Building2,
   ShieldCheck,
   ChevronRight,
-  ExternalLink,
-  User,
-  Users,
   MessageSquare,
   UserCheck,
   Briefcase,
   Mail,
   Edit,
   Trash2,
-  Award,
-  Sparkles,
-  RefreshCw,
   X,
   PhoneCall,
-  Flame,
   Radio,
-  Send,
   Eye,
-  Check,
   Menu,
-  Bell,
-  Globe,
   ArrowLeft,
   Settings,
   Database,
-  Sliders,
-  ChevronDown,
-  LogOut,
-  Hospital,
-  ShieldAlert,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
@@ -68,21 +49,17 @@ import {
   useDeleteTeamMemberMutation,
   useGetVolunteersQuery,
   useToggleVolunteerStandbyMutation,
-  useUpdateVolunteerStatusMutation,
   useAddVolunteerMutation,
   useGetCampaignsQuery,
 } from '../services/healthApi';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
 import { SEO } from '../components/common/SEO';
 import {
   BloodGroup,
   Gender,
   EmergencyTicket,
-  BloodDonor,
   ContactInquiry,
   TeamMember,
-  VolunteerProfile,
   InquiryStatus,
   InquiryCategory,
   VolunteerStatus,
@@ -105,10 +82,8 @@ const BLOOD_GROUPS: BloodGroup[] = ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', '
 const DISTRICTS_NEPAL = ['Parsa', 'Bara', 'Kathmandu', 'Chitwan', 'Dhanusha', 'Morang', 'Rautahat', 'Makwanpur'];
 
 export const DashboardPage: React.FC = () => {
-  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<DashboardSection>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('');
 
   // Clock
@@ -151,7 +126,6 @@ export const DashboardPage: React.FC = () => {
 
   const [addVolunteer, { isLoading: isAddingVolunteer }] = useAddVolunteerMutation();
   const [toggleVolunteerStandby] = useToggleVolunteerStandbyMutation();
-  const [updateVolunteerStatus] = useUpdateVolunteerStatusMutation();
 
   const [addTeamMember, { isLoading: isAddingTeam }] = useAddTeamMemberMutation();
   const [updateTeamMember] = useUpdateTeamMemberMutation();

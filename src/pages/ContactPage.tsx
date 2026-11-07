@@ -6,7 +6,6 @@ import {
   MessageSquare,
   Send,
   CheckCircle2,
-  HelpCircle,
   ChevronDown,
   Facebook,
   Instagram,
@@ -14,18 +13,17 @@ import {
   Twitter,
   Linkedin,
   Github,
-  Building2,
   PhoneCall,
   Clock,
-  Sparkles,
-  ArrowDown,
+  Globe,
+  ExternalLink,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubmitInquiryMutation } from '../services/healthApi';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { SEO } from '../components/common/SEO';
-import { OFFICIAL_SOCIAL_MEDIAS } from '../data/socialMedia';
+import { OFFICIAL_SOCIAL_MEDIAS, OFFICIAL_WEBSITES, OFFICIAL_EMAIL } from '../data/socialMedia';
 import { MedicalServicesDirectory } from '../components/common/MedicalServicesDirectory';
 
 const SOCIAL_ICON_MAP = {
@@ -284,7 +282,13 @@ export const ContactPage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <Mail className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                   <div>
-                    <strong>Email:</strong> nepalhealthsewa@gmail.com
+                    <strong>Official Email:</strong>{' '}
+                    <a
+                      href={`mailto:${OFFICIAL_EMAIL}`}
+                      className="text-red-600 hover:text-red-700 underline font-medium"
+                    >
+                      {OFFICIAL_EMAIL}
+                    </a>
                   </div>
                 </div>
 
@@ -309,6 +313,42 @@ export const ContactPage: React.FC = () => {
                       Emergency Blood & Ambulance Dispatch: <strong>24 Hours / 7 Days (365 Days)</strong>
                     </span>
                   </div>
+                </div>
+              </div>
+
+              {/* Official Websites & Mirror Portals */}
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                  Official Web Portals & Mirrors
+                </span>
+                <div className="space-y-2">
+                  {OFFICIAL_WEBSITES.map((site) => (
+                    <a
+                      key={site.domain}
+                      href={site.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-red-50/50 border border-slate-200/80 hover:border-red-200 rounded-lg text-slate-700 transition-colors group text-xs"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Globe className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                        <div className="min-w-0">
+                          <div className="font-semibold text-slate-900 group-hover:text-red-600 flex items-center gap-1.5">
+                            <span>{site.label}</span>
+                            {site.isPrimary && (
+                              <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-red-100 text-red-700 font-bold">
+                                Primary
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-500 truncate">
+                            {site.description}
+                          </div>
+                        </div>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-600 shrink-0 ml-2" />
+                    </a>
+                  ))}
                 </div>
               </div>
 

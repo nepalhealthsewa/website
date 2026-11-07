@@ -45,4 +45,12 @@ describe('Health Chatbot Knowledge Base & Matcher', () => {
     expect(res.id).toBe('fallback');
     expect(res.suggestedFollowUps?.length).toBeGreaterThan(0);
   });
+
+  it('contains valid knowledge base entries with keywords and responses', () => {
+    expect(BOT_KNOWLEDGE_BASE.length).toBeGreaterThan(0);
+    BOT_KNOWLEDGE_BASE.forEach((entry) => {
+      expect(entry.id).toBeTruthy();
+      expect(entry.response.length).toBeGreaterThan(0);
+    });
+  });
 });

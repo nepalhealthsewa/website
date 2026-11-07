@@ -4,6 +4,8 @@ import {
   EMERGENCY_HOTLINES,
   TRUST_PILLARS,
   OFFICIAL_SOCIAL_MEDIAS,
+  OFFICIAL_WEBSITES,
+  OFFICIAL_EMAIL,
 } from '../components/layout/Footer';
 
 describe('Footer Configuration & Safety Benchmarks', () => {
@@ -77,5 +79,18 @@ describe('Footer Configuration & Safety Benchmarks', () => {
 
     const gh = OFFICIAL_SOCIAL_MEDIAS.find((s) => s.id === 'github');
     expect(gh?.url).toBe('https://github.com/nepalhealthsewa');
+  });
+
+  it('configures official website domains and official email', () => {
+    expect(OFFICIAL_EMAIL).toBe('Nepalhealthsewa@gmail.com');
+    expect(OFFICIAL_WEBSITES.length).toBe(3);
+
+    const urls = OFFICIAL_WEBSITES.map((w) => w.url);
+    expect(urls).toContain('https://nepalhealthsewa.com');
+    expect(urls).toContain('https://nepalhealthsewa.netlify.app');
+    expect(urls).toContain('https://nepalhealthsewa.pages.dev');
+
+    const primary = OFFICIAL_WEBSITES.find((w) => w.isPrimary);
+    expect(primary?.url).toBe('https://nepalhealthsewa.com');
   });
 });

@@ -9,9 +9,7 @@ import {
   Calendar,
   AlertCircle,
   HeartHandshake,
-  UserCheck,
   Sparkles,
-  Filter,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';

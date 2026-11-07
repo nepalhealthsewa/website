@@ -1,5 +1,4 @@
 import React from 'react';
-import { Users, Heart, ExternalLink } from 'lucide-react';
 import { TEAM_MEMBERS } from '../data/mockData';
 import { Card } from '../components/ui/Card';
 import { SEO } from '../components/common/SEO';

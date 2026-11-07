@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Search, ArrowRight, ShieldCheck, HeartPulse } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { useGetDiseasesQuery } from '../services/healthApi';
 import { Card } from '../components/ui/Card';
 import { SEO } from '../components/common/SEO';

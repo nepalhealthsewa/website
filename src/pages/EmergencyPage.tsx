@@ -9,8 +9,6 @@ import {
   Clock,
   CheckCircle2,
   MapPin,
-  ExternalLink,
-  ShieldAlert,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -18,7 +16,6 @@ import {
   useGetEmergencyTicketsQuery,
 } from '../services/healthApi';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
 import { EMERGENCY_CONTACTS } from '../data/mockData';
 import { BloodGroup, EmergencyServiceType, Gender } from '../types';
 import { SEO } from '../components/common/SEO';

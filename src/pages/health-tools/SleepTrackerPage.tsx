@@ -6,8 +6,6 @@ import {
   Trash2,
   Clock,
   Sparkles,
-  Info,
-  ShieldCheck,
   TrendingUp,
 } from 'lucide-react';
 import {

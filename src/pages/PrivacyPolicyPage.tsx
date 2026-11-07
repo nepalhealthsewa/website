@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Lock, Eye, Database } from 'lucide-react';
+import { Lock, Eye, Database } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { SEO } from '../components/common/SEO';
 

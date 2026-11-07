@@ -1,6 +1,8 @@
-# Robots.txt for Nepal Health Sewa (https://nepalhealthsewa.netlify.app/)
+# Robots.txt for Nepal Health Sewa (https://nepalhealthsewa.com / https://nepalhealthsewa.netlify.app / https://nepalhealthsewa.pages.dev)
 User-agent: *
 Allow: /
 
 # Sitemaps
+Sitemap: https://nepalhealthsewa.com/sitemap.xml
 Sitemap: https://nepalhealthsewa.netlify.app/sitemap.xml
+Sitemap: https://nepalhealthsewa.pages.dev/sitemap.xml

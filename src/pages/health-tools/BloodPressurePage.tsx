@@ -4,8 +4,6 @@ import {
   AlertTriangle,
   RotateCcw,
   ShieldAlert,
-  Info,
-  CheckCircle2,
   PhoneCall,
   Activity,
 } from 'lucide-react';

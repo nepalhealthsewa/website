@@ -116,5 +116,25 @@ describe('Health Calculators Unit Tests', () => {
       expect(state.sleepRecords.length).toBe(1);
       expect(state.sleepRecords[0].durationHours).toBe(8);
     });
+
+    it('handles toolsSlice bmi entry addition', () => {
+      const initialState = {
+        sleepRecords: [],
+        bmiHistory: [],
+        bpHistory: [],
+      };
+      const state = toolsReducer(
+        initialState,
+        addBmiEntry({
+          bmi: 22.9,
+          category: 'Normal Weight',
+          heightCm: 175,
+          weightKg: 70,
+        })
+      );
+      expect(state.bmiHistory.length).toBe(1);
+      expect(state.bmiHistory[0].bmi).toBe(22.9);
+      expect(state.bmiHistory[0].category).toBe('Normal Weight');
+    });
   });
 });

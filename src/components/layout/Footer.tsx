@@ -21,10 +21,11 @@ import {
   Twitter,
   Linkedin,
   Github,
+  Globe,
 } from 'lucide-react';
-import { OFFICIAL_SOCIAL_MEDIAS } from '../../data/socialMedia';
+import { OFFICIAL_SOCIAL_MEDIAS, OFFICIAL_WEBSITES, OFFICIAL_EMAIL } from '../../data/socialMedia';
 
-export { OFFICIAL_SOCIAL_MEDIAS };
+export { OFFICIAL_SOCIAL_MEDIAS, OFFICIAL_WEBSITES, OFFICIAL_EMAIL };
 
 const SOCIAL_ICON_MAP = {
   facebook: Facebook,
@@ -256,10 +257,10 @@ export const Footer: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-red-500 shrink-0" />
                 <a
-                  href="mailto:nepalhealthsewa@gmail.com"
+                  href={`mailto:${OFFICIAL_EMAIL}`}
                   className="hover:text-white transition-colors"
                 >
-                  nepalhealthsewa@gmail.com
+                  {OFFICIAL_EMAIL}
                 </a>
               </div>
               <div className="flex items-center gap-2">
@@ -274,6 +275,43 @@ export const Footer: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 <span className="text-[11px]">Emergency Dispatch: 24/7 Non-stop</span>
+              </div>
+              <div className="flex items-start gap-2 pt-1 border-t border-slate-800/60">
+                <Globe className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
+                <div className="text-[11px] leading-tight space-y-1">
+                  <span className="font-semibold text-slate-300 block">Official Websites:</span>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-slate-400">
+                    <a
+                      href="https://nepalhealthsewa.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-red-400 hover:text-white underline underline-offset-2 transition-colors font-medium"
+                      title="Nepal Health Sewa - Primary Portal"
+                    >
+                      nepalhealthsewa.com
+                    </a>
+                    <span>·</span>
+                    <a
+                      href="https://nepalhealthsewa.netlify.app"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-white underline underline-offset-2 transition-colors"
+                      title="Nepal Health Sewa - Netlify Mirror"
+                    >
+                      nepalhealthsewa.netlify.app
+                    </a>
+                    <span>·</span>
+                    <a
+                      href="https://nepalhealthsewa.pages.dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-white underline underline-offset-2 transition-colors"
+                      title="Nepal Health Sewa - Cloudflare Pages Mirror"
+                    >
+                      nepalhealthsewa.pages.dev
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
 

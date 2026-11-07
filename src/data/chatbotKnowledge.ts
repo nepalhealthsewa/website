@@ -448,10 +448,15 @@ Ghantaghar Chowk, Birgunj, Parsa, Madhesh Province, Nepal
 • **+977 9845012345**
 • **+977 9804812345**
 
-✉️ **Email:**
-nepalhealthsewa@gmail.com
+✉️ **Official Email:**
+Nepalhealthsewa@gmail.com
 
-🌐 **Social Media (@nepalhealthsewa):**
+🌐 **Official Websites:**
+• **Primary Portal:** https://nepalhealthsewa.com
+• **Netlify Mirror:** https://nepalhealthsewa.netlify.app
+• **Cloudflare Pages:** https://nepalhealthsewa.pages.dev
+
+📱 **Social Media (@nepalhealthsewa):**
 • YouTube: youtube.com/@nepalhealthsewa
 • Instagram: instagram.com/nepalhealthsewa
 • Facebook: facebook.com/nepalhealthsewa
