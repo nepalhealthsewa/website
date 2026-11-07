@@ -1,0 +1,24 @@
+{
+  "name": "Nepal Health Sewa | Donate Blood, Save Life",
+  "description": "Nepal Health Sewa is a dedicated voluntary blood donation and transfusion platform connecting donors, emergency hospital wards, and community blood banks across Nepal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/nepalhealthsewa",
+    "instagram": "https://www.instagram.com/nepalhealthsewa",
+    "youtube": "https://www.youtube.com/@nepalhealthsewa",
+    "twitter": "https://twitter.com/nepalhealthsewa",
+    "linkedin": "https://www.linkedin.com/in/nepalhealthsewa",
+    "github": "https://github.com/nepalhealthsewa"
+  },
+  "sameAs": [
+    "https://www.facebook.com/nepalhealthsewa",
+    "https://www.instagram.com/nepalhealthsewa",
+    "https://www.youtube.com/@nepalhealthsewa",
+    "https://twitter.com/nepalhealthsewa",
+    "https://www.linkedin.com/in/nepalhealthsewa",
+    "https://github.com/nepalhealthsewa"
+  ]
+}

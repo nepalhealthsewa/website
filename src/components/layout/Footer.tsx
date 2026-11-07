@@ -1,0 +1,510 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import {
+  Droplet,
+  MapPin,
+  Mail,
+  Phone,
+  PhoneCall,
+  Heart,
+  ShieldAlert,
+  ShieldCheck,
+  ArrowUp,
+  Clock,
+  HeartPulse,
+  Activity,
+  ChevronRight,
+  Stethoscope,
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitter,
+  Linkedin,
+  Github,
+} from 'lucide-react';
+import { OFFICIAL_SOCIAL_MEDIAS } from '../../data/socialMedia';
+
+export { OFFICIAL_SOCIAL_MEDIAS };
+
+const SOCIAL_ICON_MAP = {
+  facebook: Facebook,
+  instagram: Instagram,
+  youtube: Youtube,
+  twitter: Twitter,
+  linkedin: Linkedin,
+  github: Github,
+};
+
+export const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+
+export const EMERGENCY_HOTLINES = [
+  {
+    name: 'Ambulance (MoHP Nepal)',
+    number: '102',
+    tel: 'tel:102',
+    desc: 'Toll-free emergency triage',
+    accent: 'bg-red-500/10 text-red-300 border-red-500/30 hover:bg-red-500/20 hover:border-red-400/50',
+    iconColor: 'text-red-400',
+  },
+  {
+    name: 'Blood Emergency Desk',
+    number: '+977 9845012345',
+    tel: 'tel:+9779845012345',
+    desc: '24/7 volunteer donor bridge',
+    accent: 'bg-rose-500/10 text-rose-300 border-rose-500/30 hover:bg-rose-500/20 hover:border-rose-400/50',
+    iconColor: 'text-rose-400',
+  },
+  {
+    name: 'Nepal Police Control',
+    number: '100',
+    tel: 'tel:100',
+    desc: 'Emergency security dispatch',
+    accent: 'bg-blue-500/10 text-blue-300 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-400/50',
+    iconColor: 'text-blue-400',
+  },
+  {
+    name: 'Narayani Hospital Birgunj',
+    number: '051-521993',
+    tel: 'tel:051521993',
+    desc: 'Central Emergency & Blood Bank',
+    accent: 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20 hover:border-amber-400/50',
+    iconColor: 'text-amber-400',
+  },
+  {
+    name: 'Oxygen Logistics Helpdesk',
+    number: '+977 9804812345',
+    tel: 'tel:+9779804812345',
+    desc: 'Cylinder supply & flowmeter',
+    accent: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20 hover:border-emerald-400/50',
+    iconColor: 'text-emerald-400',
+  },
+];
+
+export const TRUST_PILLARS = [
+  {
+    title: '100% Free & Voluntary',
+    description: 'Zero brokerage, fee, or middleman charges for connecting blood donors with patients.',
+    icon: Heart,
+  },
+  {
+    title: 'Community Verified',
+    description: 'Voluntary donors and blood camps validated by dedicated coordinators in Parsa and Madhesh.',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'Clinical Standards Grounded',
+    description: 'Health tools and guidelines aligned with Nepal MoHP, WHO, and AHA benchmarks.',
+    icon: Stethoscope,
+  },
+  {
+    title: 'Private & In-Browser',
+    description: 'Calculators and health logs compute entirely on your device with zero data harvesting.',
+    icon: Activity,
+  },
+];
+
+export const Footer: React.FC = () => {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer
+      className="bg-slate-950 text-slate-300 border-t border-slate-800/90 relative"
+      role="contentinfo"
+      aria-label="Site Footer"
+    >
+      {/* Top Accent Gradient Line */}
+      <div className="h-1 w-full bg-gradient-to-r from-red-600 via-rose-500 to-red-700" />
+
+      {/* Optimized Emergency Hotlines Banner */}
+      <section
+        className="border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-xs py-4 lg:py-5"
+        aria-label="Emergency Hotlines and Rapid Helpline Desk"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+              </span>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                <span>Emergency Sewa & Medical Hotlines</span>
+                <span className="text-[10px] font-semibold bg-red-950/90 text-red-300 border border-red-800/60 px-2 py-0.5 rounded-full">
+                  24/7 Priority
+                </span>
+              </h3>
+            </div>
+
+            <Link
+              to="/emergency"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-rose-300 hover:text-white transition-colors"
+            >
+              <span>Emergency Protocols & Hospitals</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            {EMERGENCY_HOTLINES.map((hotline) => (
+              <a
+                key={hotline.name}
+                href={hotline.tel}
+                className={`p-2.5 rounded-lg border transition-all duration-150 flex flex-col justify-between group ${hotline.accent} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-400`}
+                title={`Call ${hotline.name} at ${hotline.number}`}
+              >
+                <div className="flex items-center justify-between gap-1.5">
+                  <span className="text-[11px] font-medium text-slate-300 group-hover:text-white truncate">
+                    {hotline.name}
+                  </span>
+                  <PhoneCall className={`w-3 h-3 shrink-0 ${hotline.iconColor} group-hover:scale-110 transition-transform`} />
+                </div>
+                <div className="mt-1.5">
+                  <div className="text-sm font-bold tracking-tight text-white">
+                    {hotline.number}
+                  </div>
+                  <span className="text-[10px] text-slate-400 block truncate">
+                    {hotline.desc}
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Streamlined Blood Group Donor Quick Search */}
+      <section
+        className="border-b border-slate-800/60 bg-slate-900/30 py-3"
+        aria-label="Quick Blood Group Donor Search"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <Droplet className="w-3.5 h-3.5 text-red-500 fill-red-500 shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                Blood Group Lookup:
+              </span>
+            </div>
+
+            <div className="flex items-center flex-wrap gap-1.5">
+              {BLOOD_GROUPS.map((group) => (
+                <Link
+                  key={group}
+                  to={`/blood-bank?group=${encodeURIComponent(group)}`}
+                  className="px-2.5 py-0.5 text-xs font-bold rounded bg-slate-800/90 hover:bg-red-600 text-slate-200 hover:text-white border border-slate-700/80 hover:border-red-500 transition-colors"
+                  title={`Find voluntary ${group} blood donors in Nepal`}
+                >
+                  {group}
+                </Link>
+              ))}
+
+              <Link
+                to="/blood-bank?tab=register"
+                className="ml-1 px-2.5 py-0.5 text-xs font-semibold rounded bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white flex items-center gap-1 transition-all"
+              >
+                <Heart className="w-3 h-3 fill-white" />
+                <span>+ Register</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Navigation & Organization Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
+          {/* Identity & Birgunj Roots (lg:col-span-4) */}
+          <div className="lg:col-span-4 space-y-3">
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/img/logo.af0d533f.png"
+                alt="Nepal Health Sewa Logo"
+                className="w-10 h-10 object-contain bg-white/10 rounded-lg p-1 border border-white/10"
+                loading="lazy"
+                decoding="async"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
+                }}
+              />
+              <div className="flex flex-col">
+                <span className="text-lg font-bold tracking-tight text-white leading-tight">
+                  Nepal Health Sewa
+                </span>
+                <span className="text-[11px] text-red-400 font-semibold">
+                  रक्तदान जीवनदान · Donate Blood, Save Life
+                </span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Non-profit volunteer healthcare initiative rooted in Ghantaghar, Birgunj, Nepal. Coordinating voluntary blood donation, bridging emergency oxygen, and providing verified clinical calculators.
+            </p>
+
+            {/* Contact Details */}
+            <div className="text-xs text-slate-400 space-y-1.5 pt-1">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
+                <span>Ghantaghar, Main Road, Birgunj-10, Parsa, Nepal</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                <a
+                  href="mailto:nepalhealthsewa@gmail.com"
+                  className="hover:text-white transition-colors"
+                >
+                  nepalhealthsewa@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                <a
+                  href="tel:+9779845012345"
+                  className="hover:text-white transition-colors font-medium text-slate-300"
+                >
+                  Hotline: +977 9845012345 / 051-521993
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span className="text-[11px]">Emergency Dispatch: 24/7 Non-stop</span>
+              </div>
+            </div>
+
+            {/* Official Social Media Links */}
+            <div className="pt-1.5">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
+                Official Social Media (@nepalhealthsewa)
+              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {OFFICIAL_SOCIAL_MEDIAS.map((social) => {
+                  const Icon = SOCIAL_ICON_MAP[social.id];
+                  return (
+                    <a
+                      key={social.id}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Nepal Health Sewa on ${social.name} (${social.handle})`}
+                      title={`${social.name}: ${social.handle}`}
+                      className={`w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 transition-colors ${social.hoverColor}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Blood & Emergency Column (lg:col-span-3) */}
+          <div className="lg:col-span-3 space-y-2.5">
+            <h4 className="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-1.5">
+              <Droplet className="w-3.5 h-3.5 text-red-500" />
+              <span>Blood & Emergency</span>
+            </h4>
+            <ul className="space-y-1.5 text-xs">
+              <li>
+                <Link to="/blood-bank" className="text-slate-400 hover:text-white transition-colors">
+                  Donor Directory
+                </Link>
+              </li>
+              <li>
+                <Link to="/blood-bank?tab=register" className="text-slate-400 hover:text-white transition-colors">
+                  Become a Voluntary Donor
+                </Link>
+              </li>
+              <li>
+                <Link to="/emergency" className="text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+                  <span>24*7 Emergency Blood Sewa</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                </Link>
+              </li>
+              <li>
+                <Link to="/campaign" className="text-slate-400 hover:text-white transition-colors">
+                  Blood Donation Camps
+                </Link>
+              </li>
+              <li>
+                <Link to="/services" className="text-slate-400 hover:text-white transition-colors">
+                  Services Overview
+                </Link>
+              </li>
+              <li>
+                <Link to="/blood-bank?group=O-" className="text-slate-400 hover:text-white transition-colors">
+                  Rare Negative Blood Donors
+                </Link>
+              </li>
+              <li>
+                <Link to="/dashboard" className="text-rose-400 hover:text-rose-300 font-semibold transition-colors flex items-center gap-1">
+                  <span>Operations Dashboard</span>
+                  <ChevronRight className="w-3 h-3" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Health Calculators & Clinical Guides (lg:col-span-3) */}
+          <div className="lg:col-span-3 space-y-2.5">
+            <h4 className="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-1.5">
+              <HeartPulse className="w-3.5 h-3.5 text-rose-500" />
+              <span>Calculators & Diseases</span>
+            </h4>
+            <ul className="space-y-1.5 text-xs">
+              <li>
+                <Link to="/health-tools/bmi" className="text-slate-400 hover:text-white transition-colors">
+                  BMI Calculator (Asian Cutoff)
+                </Link>
+              </li>
+              <li>
+                <Link to="/health-tools/blood-pressure" className="text-slate-400 hover:text-white transition-colors">
+                  Blood Pressure Staging
+                </Link>
+              </li>
+              <li>
+                <Link to="/health-tools/meal-planner" className="text-slate-400 hover:text-white transition-colors">
+                  Macro Meal Planner (Dal-Bhat)
+                </Link>
+              </li>
+              <li>
+                <Link to="/health-tools/sleep-tracker" className="text-slate-400 hover:text-white transition-colors">
+                  Sleep Duration & Hygiene
+                </Link>
+              </li>
+              <li>
+                <Link to="/health-tools/exercise" className="text-slate-400 hover:text-white transition-colors">
+                  Exercise & Calorie Burn
+                </Link>
+              </li>
+              <li>
+                <Link to="/covid-guidlines" className="text-slate-400 hover:text-white transition-colors">
+                  COVID-19 Health Directives
+                </Link>
+              </li>
+              <li>
+                <Link to="/diseases" className="text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1">
+                  <span>Clinical Disease Library</span>
+                  <ChevronRight className="w-3 h-3" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Community & Legal (lg:col-span-2) */}
+          <div className="lg:col-span-2 space-y-2.5">
+            <h4 className="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Community</span>
+            </h4>
+            <ul className="space-y-1.5 text-xs">
+              <li>
+                <Link to="/about" className="text-slate-400 hover:text-white transition-colors">
+                  About Our Mission
+                </Link>
+              </li>
+              <li>
+                <Link to="/team" className="text-slate-400 hover:text-white transition-colors">
+                  Our Volunteers & Team
+                </Link>
+              </li>
+              <li>
+                <Link to="/gallery" className="text-slate-400 hover:text-white transition-colors">
+                  Field Photo Gallery
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-slate-400 hover:text-white transition-colors">
+                  Contact Birgunj Desk
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="text-slate-400 hover:text-white transition-colors">
+                  Privacy Policy & Data
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="text-slate-400 hover:text-white transition-colors">
+                  Terms of Service & Charter
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Compact Trust Pillars Strip */}
+        <div className="mt-8 pt-6 border-t border-slate-800/80">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {TRUST_PILLARS.map((pillar) => {
+              const IconComponent = pillar.icon;
+              return (
+                <div
+                  key={pillar.title}
+                  className="p-3 rounded-lg bg-slate-900/60 border border-slate-800/80 flex items-start gap-2.5"
+                >
+                  <div className="p-1.5 rounded-md bg-red-500/10 text-red-400 shrink-0 mt-0.5">
+                    <IconComponent className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold text-white">
+                      {pillar.title}
+                    </h5>
+                    <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                      {pillar.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Compact Medical Safety Notice */}
+        <div className="mt-5 p-3 rounded-xl bg-amber-950/20 border border-amber-900/40 text-amber-200/90 text-xs flex items-start gap-2.5">
+          <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-[11px] leading-relaxed text-amber-200/80">
+            <strong className="text-amber-200">Clinical Notice:</strong> Nepal Health Sewa is an independent non-profit volunteer health initiative based in Birgunj, Parsa, Nepal. Information and calculators are provided for community literacy and blood donor coordination. In acute emergencies, dial <strong>102 (Ambulance)</strong> or proceed to Narayani Hospital Birgunj or your nearest emergency center.
+          </p>
+        </div>
+
+        {/* Bottom Bar: Copyright, Birgunj Identity, and Scroll to Top */}
+        <div className="mt-6 pt-5 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 pb-16 sm:pb-6 lg:pb-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-center sm:text-left">
+            <span>© {currentYear} Nepal Health Sewa. All rights reserved.</span>
+            <span className="hidden sm:inline text-slate-700">|</span>
+            <span className="text-slate-400">Ghantaghar, Birgunj, Parsa, Nepal</span>
+            <span className="hidden sm:inline text-slate-700">|</span>
+            <span className="text-red-400 font-medium">रक्तदान जीवनदान</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link to="/privacy-policy" className="hover:text-slate-300 transition-colors">
+              Privacy
+            </Link>
+            <Link to="/terms" className="hover:text-slate-300 transition-colors">
+              Terms
+            </Link>
+            <Link to="/contact" className="hover:text-slate-300 transition-colors">
+              Helpdesk
+            </Link>
+
+            <button
+              onClick={scrollToTop}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 transition-colors text-xs font-medium cursor-pointer"
+              title="Scroll back to top of page"
+              aria-label="Scroll back to top of page"
+            >
+              <span>Top</span>
+              <ArrowUp className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
