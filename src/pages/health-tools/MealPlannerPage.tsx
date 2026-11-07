@@ -3,6 +3,7 @@ import { Utensils, ShieldCheck } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { MealRecommendation } from '../../types';
 import { SEO } from '../../components/common/SEO';
+import nutritionImage from '../../assets/images/healthy_nepali_nutrition_1792473887224.jpg';
 
 type DietaryGoal = 'weight-loss' | 'maintenance' | 'muscle-building' | 'diabetes-friendly' | 'heart-healthy';
 type DietType = 'vegetarian' | 'non-vegetarian' | 'high-fiber-vegan';
@@ -359,10 +360,13 @@ export const MealPlannerPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs">
         <div className="lg:col-span-5 h-64 rounded-xl overflow-hidden shadow-xs">
           <img
-            src="/src/assets/images/healthy_nepali_nutrition_1792473887224.jpg"
+            src={nutritionImage}
             alt="Healthy traditional Nepali thali"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/img/healthy_nepali_nutrition.jpg';
+            }}
           />
         </div>
         <div className="lg:col-span-7 space-y-3">

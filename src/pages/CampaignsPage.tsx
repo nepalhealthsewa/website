@@ -73,6 +73,9 @@ export const CampaignsPage: React.FC = () => {
                     alt={camp.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/img/overview.36cb952a.jpg';
+                    }}
                   />
                   <div className="absolute top-3 right-3 bg-white/95 px-2.5 py-1 rounded-md text-xs font-bold text-red-700 shadow-xs">
                     {camp.status}

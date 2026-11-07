@@ -19,6 +19,7 @@ import { Card } from '../components/ui/Card';
 import { BloodGroup } from '../types';
 import { SEO } from '../components/common/SEO';
 import { HealthTipsSection } from '../components/common/HealthTipsSection';
+import heroImage from '../assets/images/hero_nepal_health_sewa_1792473886512.jpg';
 
 export const HomePage: React.FC = () => {
   const { data: campaigns } = useGetCampaignsQuery();
@@ -155,10 +156,13 @@ export const HomePage: React.FC = () => {
             <div className="lg:col-span-5 relative flex items-center">
               <div className="w-full h-full min-h-[320px] sm:min-h-[400px] rounded-2xl overflow-hidden shadow-lg border border-slate-200/80 relative">
                 <img
-                  src="/src/assets/images/hero_nepal_health_sewa_1792473886512.jpg"
+                  src={heroImage}
                   alt="Community healthcare clinic and voluntary blood donation in Nepal"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/img/hero_nepal_health_sewa.jpg';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent flex flex-col justify-end p-6 text-white">
                   <div className="inline-flex items-center gap-1.5 text-xs text-red-300 font-semibold mb-1">
@@ -592,6 +596,9 @@ export const HomePage: React.FC = () => {
                   alt={camp.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/img/overview.36cb952a.jpg';
+                  }}
                 />
                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md text-[11px] font-bold text-red-700 shadow-xs">
                   {camp.status}

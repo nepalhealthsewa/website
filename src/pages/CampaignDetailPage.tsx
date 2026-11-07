@@ -113,6 +113,9 @@ export const CampaignDetailPage: React.FC = () => {
           alt={campaign.title}
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = '/img/overview.36cb952a.jpg';
+          }}
         />
         <div className="absolute top-4 right-4 bg-white/95 px-3 py-1 rounded-md text-xs font-bold text-red-700 shadow-xs">
           {campaign.status}

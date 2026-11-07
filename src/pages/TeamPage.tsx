@@ -47,6 +47,9 @@ export const TeamPage: React.FC = () => {
                     alt={member.name}
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/img/logo.af0d533f.png';
+                    }}
                   />
                 </div>
                 <div className="text-center">
@@ -118,6 +121,9 @@ export const TeamPage: React.FC = () => {
                   alt={vol.name}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/img/logo.af0d533f.png';
+                  }}
                 />
               </div>
               <div className="space-y-1">

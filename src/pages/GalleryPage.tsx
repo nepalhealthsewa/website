@@ -62,6 +62,9 @@ export const GalleryPage: React.FC = () => {
                 alt={item.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/img/overview.36cb952a.jpg';
+                }}
               />
             </div>
             <div className="p-4 bg-white flex items-center justify-between">
@@ -114,6 +117,9 @@ export const GalleryPage: React.FC = () => {
                 alt={selectedImage.title}
                 className="w-full h-full object-contain"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/img/overview.36cb952a.jpg';
+                }}
               />
             </div>
             <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
