@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { TEAM_MEMBERS } from '../data/mockData';
 import { Card } from '../components/ui/Card';
 import { SEO } from '../components/common/SEO';
@@ -181,12 +182,12 @@ export const TeamPage: React.FC = () => {
           <div className="text-xs text-slate-400">
             Formal civic service certificates awarded after 6 months of active engagement.
           </div>
-          <a
-            href="/contact"
+          <Link
+            to="/contact"
             className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-colors"
           >
             Apply to Volunteer
-          </a>
+          </Link>
         </div>
       </div>
     </div>

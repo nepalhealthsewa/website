@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   PhoneCall,
   AlertTriangle,
@@ -467,13 +468,13 @@ export const EmergencyPage: React.FC = () => {
             </div>
 
             <div className="mt-4 pt-4 border-t border-slate-100">
-              <a
-                href="/contact#medical-directory"
+              <Link
+                to="/contact#medical-directory"
                 className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors shadow-xs"
               >
                 <Building2 className="w-4 h-4 text-rose-400" />
                 <span>View Full Medical Directory (Hospitals & Ambulances)</span>
-              </a>
+              </Link>
             </div>
           </div>
 

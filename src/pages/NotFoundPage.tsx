@@ -2,10 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { HeartCrack, Home, PhoneCall } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { SEO } from '../components/common/SEO';
 
 export const NotFoundPage: React.FC = () => {
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+      <SEO
+        title="404 - Page Not Found"
+        description="The requested healthcare resource or blood donor record does not exist or has been relocated."
+      />
       <div className="max-w-md w-full text-center space-y-6">
         <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto shadow-xs">
           <HeartCrack className="w-8 h-8" />

@@ -46,9 +46,11 @@ describe('SEO & Schema.org JSON-LD Metadata Verification', () => {
     const indexPath = path.resolve(__dirname, '../../index.html');
     const html = fs.readFileSync(indexPath, 'utf-8');
 
-    // Verify twitter tags
+    // Verify twitter and canonical tags
     expect(html).toContain('<meta name="twitter:site" content="@nepalhealthsewa" />');
     expect(html).toContain('<meta name="twitter:creator" content="@nepalhealthsewa" />');
+    expect(html).toContain('<link rel="canonical" href="https://nepalhealthsewa.com/" />');
+    expect(html).toContain('<meta property="og:url" content="https://nepalhealthsewa.com/" />');
 
     // Extract JSON-LD script
     const jsonLdMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
