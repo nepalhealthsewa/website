@@ -128,6 +128,9 @@ export const CovidGuidelinesPage: React.FC = () => {
               src="/img/overview.36cb952a.jpg"
               alt="COVID-19 Health Overview & Protection"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
+              }}
             />
           </div>
           <h4 className="font-bold text-sm text-slate-900">
@@ -144,6 +147,9 @@ export const CovidGuidelinesPage: React.FC = () => {
               src="/img/wear.415a9039.jpg"
               alt="How to wear mask correctly"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
+              }}
             />
           </div>
           <h4 className="font-bold text-sm text-slate-900">

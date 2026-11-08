@@ -2140,6 +2140,9 @@ export const DashboardPage: React.FC = () => {
                           src={camp.bannerImage}
                           alt={camp.title}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/img/overview.36cb952a.jpg';
+                          }}
                         />
                         <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/80 text-white backdrop-blur-xs">
                           {camp.status}

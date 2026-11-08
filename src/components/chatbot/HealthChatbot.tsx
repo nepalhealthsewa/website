@@ -275,6 +275,9 @@ How can I help you today?`,
                 src="/img/logo.af0d533f.png"
                 alt="Nepal Health Sewa"
                 className="w-7 h-7 object-contain drop-shadow-sm group-hover:rotate-6 transition-transform"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
+                }}
               />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-red-600 rounded-full" />
             </div>
@@ -310,6 +313,9 @@ How can I help you today?`,
                   src="/img/logo.af0d533f.png"
                   alt="Nepal Health Sewa Logo"
                   className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
+                  }}
                 />
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-red-600 rounded-full" />
               </div>
@@ -402,6 +408,9 @@ How can I help you today?`,
                               src="/img/logo.af0d533f.png"
                               alt="Bot"
                               className="w-full h-full object-contain"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
+                              }}
                             />
                           </div>
                         )}
