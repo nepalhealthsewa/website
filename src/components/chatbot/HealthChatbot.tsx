@@ -14,6 +14,7 @@ import {
   FastForward,
   Minimize2,
   Maximize2,
+  MessageSquare,
 } from 'lucide-react';
 import {
   queryKnowledgeBase,
@@ -242,53 +243,27 @@ How can I help you today?`,
 
   return (
     <>
-      {/* Floating Launcher Button */}
+      {/* Floating Launcher Button - Icon Only */}
       {!isOpen && (
-        <div className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex flex-col items-end">
-          {hasUnreadNotification && (
-            <div className="mb-2 bg-white text-slate-900 text-xs px-3 py-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-2 animate-bounce max-w-[220px]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
-              <span>Need blood or emergency info? Chat with us!</span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setHasUnreadNotification(false);
-                }}
-                className="text-slate-400 hover:text-slate-700 ml-auto"
-                aria-label="Dismiss notification"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-
+        <div className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40">
           <button
             onClick={() => {
               setIsOpen(true);
               setIsMinimized(false);
+              setHasUnreadNotification(false);
             }}
-            className="group relative flex items-center gap-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white px-4 py-3 sm:px-5 sm:py-3.5 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-white/20"
+            className="group relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-tr from-red-600 via-rose-600 to-red-600 hover:from-red-700 hover:via-rose-700 hover:to-red-700 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border-2 border-white/30 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
             aria-label="Open Nepal Health Sewa Assistant"
+            title="Chat with Nepal Health Sewa Assistant"
           >
-            <div className="relative">
-              <img
-                src="/img/logo.af0d533f.png"
-                alt="Nepal Health Sewa"
-                className="w-7 h-7 object-contain drop-shadow-sm group-hover:rotate-6 transition-transform"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
-                }}
-              />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-red-600 rounded-full" />
-            </div>
-            <div className="text-left hidden sm:block">
-              <div className="text-xs font-semibold uppercase tracking-wider text-red-100 flex items-center gap-1">
-                <span>Health Assistant</span>
-                <Sparkles className="w-3 h-3 text-amber-300" />
-              </div>
-              <div className="text-xs font-bold text-white leading-tight">
-                24/7 Helpline & Guide
-              </div>
+            <div className="relative flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" />
+              {hasUnreadNotification && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-rose-600" />
+                </span>
+              )}
             </div>
           </button>
         </div>
