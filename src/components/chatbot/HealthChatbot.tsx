@@ -246,15 +246,15 @@ How can I help you today?`,
       {!isOpen && (
         <div className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex flex-col items-end">
           {hasUnreadNotification && (
-            <div className="mb-2 bg-slate-900 text-white text-xs px-3 py-2 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2 animate-bounce max-w-[220px]">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
+            <div className="mb-2 bg-white text-slate-900 text-xs px-3 py-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-2 animate-bounce max-w-[220px]">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
               <span>Need blood or emergency info? Chat with us!</span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setHasUnreadNotification(false);
                 }}
-                className="text-slate-400 hover:text-white ml-auto"
+                className="text-slate-400 hover:text-slate-700 ml-auto"
                 aria-label="Dismiss notification"
               >
                 <X className="w-3.5 h-3.5" />

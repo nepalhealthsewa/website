@@ -41,11 +41,11 @@ export const ServicesPage: React.FC = () => {
         <span className="text-xs font-semibold uppercase tracking-wider text-red-600 block mb-1">
           Community Health & Emergency Network
         </span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
           Our Healthcare Services
         </h1>
         <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl leading-relaxed">
-          Delivering voluntary blood donor coordination, emergency oxygen logistics, 24/7 ambulance assistance, preventative health tools, and public health guidelines across Nepal.
+          Delivering voluntary blood donor coordination, emergency oxygen logistics, 24/7 ambulance assistance, preventive health tools, and public health guidelines across Nepal.
         </p>
       </div>
 
@@ -139,16 +139,16 @@ export const ServicesPage: React.FC = () => {
       </div>
 
       {/* Emergency Assistance Callout */}
-      <div className="bg-slate-900 text-white rounded-2xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="bg-white text-slate-900 rounded-2xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-200/80 shadow-xs">
         <div className="space-y-2 max-w-xl">
-          <h3 className="text-xl font-bold">Have an immediate medical emergency in Birgunj or Parsa?</h3>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <h3 className="text-xl font-bold font-display text-slate-900">Have an immediate medical emergency in Birgunj or Parsa?</h3>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             Our volunteer response desk is available 24 hours a day to connect you with available blood units, ambulances, or oxygen refilling plants.
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Link to="/emergency">
-            <Button variant="destructive" size="lg">
+            <Button variant="destructive" size="lg" className="min-h-[44px]">
               <PhoneCall className="w-4 h-4 mr-2" />
               <span>Emergency Sewa 24*7</span>
             </Button>

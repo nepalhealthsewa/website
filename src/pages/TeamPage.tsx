@@ -19,7 +19,7 @@ export const TeamPage: React.FC = () => {
         <span className="text-xs font-semibold uppercase tracking-wider text-red-600 block mb-1">
           The People Behind the Sewa
         </span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
           Meet Our Team & Volunteers
         </h1>
         <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl leading-relaxed">
@@ -142,49 +142,49 @@ export const TeamPage: React.FC = () => {
       </div>
 
       {/* Volunteer With Us Callout */}
-      <div className="bg-slate-900 text-white rounded-2xl p-8 sm:p-10 space-y-6">
+      <div className="bg-white text-slate-900 rounded-2xl p-8 sm:p-10 space-y-6 border border-slate-200/80 shadow-xs">
         <div className="max-w-2xl">
-          <span className="text-xs font-semibold uppercase tracking-wider text-red-400 block mb-1">
+          <span className="text-xs font-semibold uppercase tracking-wider text-rose-600 block mb-1 font-mono">
             Civic Participation
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold">
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900">
             Join the Nepal Health Sewa Volunteer Corps
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
             We are always seeking passionate individuals across Madhesh Province and throughout Nepal who want to contribute their time and skills to emergency healthcare coordination.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-            <h4 className="text-sm font-bold text-white">Medical & Nursing Cadets</h4>
-            <p className="text-xs text-slate-300 leading-relaxed">
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="text-sm font-bold text-slate-900">Medical & Nursing Cadets</h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
               Medical interns, nursing students, and lab technicians assisting in community donor screening, vitals check, and first-aid response during blood camps.
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-            <h4 className="text-sm font-bold text-white">Emergency Hotline Coordinators</h4>
-            <p className="text-xs text-slate-300 leading-relaxed">
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="text-sm font-bold text-slate-900">Emergency Hotline Coordinators</h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
               Dedicated volunteers handling patient calls, verifying hospital requisition slips, and calling registered blood donors in critical emergencies.
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-            <h4 className="text-sm font-bold text-white">Campus & Youth Ambassadors</h4>
-            <p className="text-xs text-slate-300 leading-relaxed">
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <h4 className="text-sm font-bold text-slate-900">Campus & Youth Ambassadors</h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
               College students advocating blood donation awareness in high schools, youth clubs, and local social media networks across Parsa and beyond.
             </p>
           </div>
         </div>
 
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800">
-          <div className="text-xs text-slate-400">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
+          <div className="text-xs text-slate-500">
             Formal civic service certificates awarded after 6 months of active engagement.
           </div>
           <Link
             to="/contact"
-            className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-colors"
+            className="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors shadow-xs"
           >
             Apply to Volunteer
           </Link>

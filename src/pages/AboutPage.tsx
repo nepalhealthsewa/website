@@ -15,13 +15,13 @@ import { SEO } from '../components/common/SEO';
 export const AboutPage: React.FC = () => {
   const pillars = [
     {
-      title: 'Supportive & Helpfull',
+      title: 'Supportive & Helpful',
       desc: 'We want people to support each other to come over any difficulties. Our team works as a bridge that connects the people and health systems so that everyone can be healthy and happy.',
       icon: Users,
       color: 'bg-red-50 text-red-600',
     },
     {
-      title: 'Strengthen & Empowerment',
+      title: 'Strength & Empowerment',
       desc: 'This platform is designed to encourage humanity and awareness among the people relating to health. Our work is to ensure that no one should be deprived of basic healthcare facilities and education as far as possible.',
       icon: ShieldCheck,
       color: 'bg-emerald-50 text-emerald-600',
@@ -33,7 +33,7 @@ export const AboutPage: React.FC = () => {
       color: 'bg-blue-50 text-blue-600',
     },
     {
-      title: 'Bring Smile',
+      title: 'Bringing Smiles',
       desc: 'Relieving pain, answering emergency midnight calls, and standing beside vulnerable families in hospital waiting rooms. Spreading genuine happiness and bringing a smile to someone’s face is our core purpose.',
       icon: Sparkles,
       color: 'bg-amber-50 text-amber-600',
@@ -52,7 +52,7 @@ export const AboutPage: React.FC = () => {
         <span className="text-xs font-semibold uppercase tracking-wider text-red-600 block mb-1">
           Our Story & Vision
         </span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
           About Nepal Health Sewa
         </h1>
         <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-3xl leading-relaxed">

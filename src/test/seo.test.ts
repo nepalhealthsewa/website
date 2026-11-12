@@ -80,4 +80,14 @@ describe('SEO & Schema.org JSON-LD Metadata Verification', () => {
       );
     }
   });
+
+  it('defines smooth scrolling, page transition, and prefers-reduced-motion in index.css', () => {
+    const cssPath = path.resolve(__dirname, '../../src/index.css');
+    const css = fs.readFileSync(cssPath, 'utf-8');
+
+    expect(css).toContain('scroll-behavior: smooth');
+    expect(css).toContain('.page-transition');
+    expect(css).toContain('@keyframes pageEnter');
+    expect(css).toContain('prefers-reduced-motion: reduce');
+  });
 });

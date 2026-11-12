@@ -307,7 +307,7 @@ Our meal planner lets you set target daily calories (e.g., 1800 kcal) and genera
 • Blue or pale lips or fingernails.
 • Inability to stay awake or confusion.`,
     actionLinks: [
-      { label: '🦠 Read Full COVID Guidelines', path: '/covid-guidlines' },
+      { label: '🦠 Read Full COVID Guidelines', path: '/covid-guidelines' },
       { label: '🚨 Emergency Oxygen Support', path: '/emergency' },
     ],
     suggestedFollowUps: [
@@ -378,10 +378,10 @@ Want to organize a blood donation camp in your college, company, or club? Contac
 Nepal Health Sewa is a non-profit voluntary community healthcare network initiated in Birgunj, Parsa, Nepal.
 
 ✨ **Our 4 Pillars:**
-1. **Supportive & Helpfull:** Standing with patients and families during midnight hospital emergencies.
-2. **Strengthen & Empowerment:** Educating youths and communities on regular voluntary blood donation.
+1. **Supportive & Helpful:** Standing with patients and families during midnight hospital emergencies.
+2. **Strength & Empowerment:** Educating youths and communities on regular voluntary blood donation.
 3. **Sharing & Caring:** Connecting generous donors with recipients without financial friction.
-4. **Bring Smile:** Ensuring no patient loses their life due to a lack of compatible blood or emergency logistics.`,
+4. **Bringing Smiles:** Ensuring no patient loses their life due to a lack of compatible blood or emergency logistics.`,
     actionLinks: [
       { label: '📖 Learn More About Us', path: '/about' },
       { label: '👥 Meet Our Team', path: '/team' },

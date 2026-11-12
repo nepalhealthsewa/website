@@ -41,10 +41,10 @@ function AppContent() {
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/dashboard');
 
-  // Dedicated Administrative Layout - Completely separate from public website
+  // Dedicated Administrative Layout - Clean clinical light theme
   if (isDashboard) {
     return (
-      <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-red-500 selection:text-white antialiased">
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-rose-500 selection:text-white antialiased">
         <Routes>
           <Route path="/dashboard/*" element={<DashboardPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -59,45 +59,47 @@ function AppContent() {
       <Header />
       <MobileNav />
       <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/services" element={<ServicesPage />} />
+        <div key={location.pathname} className="page-transition min-h-full">
+          <Routes location={location}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/services" element={<ServicesPage />} />
 
-          {/* Both /blood-bank and /donor route to BloodBankPage for fidelity with reference */}
-          <Route path="/blood-bank" element={<BloodBankPage />} />
-          <Route path="/donor" element={<Navigate to="/blood-bank?tab=register" replace />} />
+            {/* Both /blood-bank and /donor route to BloodBankPage for fidelity with reference */}
+            <Route path="/blood-bank" element={<BloodBankPage />} />
+            <Route path="/donor" element={<Navigate to="/blood-bank?tab=register" replace />} />
 
-          <Route path="/emergency" element={<EmergencyPage />} />
+            <Route path="/emergency" element={<EmergencyPage />} />
 
-          <Route path="/campaign" element={<CampaignsPage />} />
-          <Route path="/campaign/:slug" element={<CampaignDetailPage />} />
+            <Route path="/campaign" element={<CampaignsPage />} />
+            <Route path="/campaign/:slug" element={<CampaignDetailPage />} />
 
-          <Route path="/covid-guidlines" element={<CovidGuidelinesPage />} />
-          <Route path="/covid-guidelines" element={<Navigate to="/covid-guidlines" replace />} />
-          <Route path="/team" element={<TeamPage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+            <Route path="/covid-guidelines" element={<CovidGuidelinesPage />} />
+            <Route path="/covid-guidlines" element={<Navigate to="/covid-guidelines" replace />} />
+            <Route path="/team" element={<TeamPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
-          {/* Health Tools Suite */}
-          <Route path="/health-tools" element={<HealthToolsIndexPage />} />
-          <Route path="/health-tools/bmi" element={<BmiCalculatorPage />} />
-          <Route path="/health-tools/blood-pressure" element={<BloodPressurePage />} />
-          <Route path="/health-tools/meal-planner" element={<MealPlannerPage />} />
-          <Route path="/health-tools/sleep-tracker" element={<SleepTrackerPage />} />
-          <Route path="/health-tools/exercise" element={<ExercisePage />} />
+            {/* Health Tools Suite */}
+            <Route path="/health-tools" element={<HealthToolsIndexPage />} />
+            <Route path="/health-tools/bmi" element={<BmiCalculatorPage />} />
+            <Route path="/health-tools/blood-pressure" element={<BloodPressurePage />} />
+            <Route path="/health-tools/meal-planner" element={<MealPlannerPage />} />
+            <Route path="/health-tools/sleep-tracker" element={<SleepTrackerPage />} />
+            <Route path="/health-tools/exercise" element={<ExercisePage />} />
 
-          {/* Diseases Library */}
-          <Route path="/diseases" element={<DiseasesPage />} />
-          <Route path="/diseases/:slug" element={<DiseaseDetailPage />} />
+            {/* Diseases Library */}
+            <Route path="/diseases" element={<DiseasesPage />} />
+            <Route path="/diseases/:slug" element={<DiseaseDetailPage />} />
 
-          {/* Legal & Policy */}
-          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms" element={<TermsPage />} />
+            {/* Legal & Policy */}
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
 
-          {/* 404 */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            {/* 404 */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
       </main>
       <HealthChatbot />
       <Footer />

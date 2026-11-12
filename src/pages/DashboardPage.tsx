@@ -5,29 +5,24 @@ import {
   Droplet,
   AlertTriangle,
   Calendar,
-  Search,
   Plus,
   Phone,
   MapPin,
   Clock,
   FileSpreadsheet,
-  Building2,
   ShieldCheck,
   ChevronRight,
   MessageSquare,
   UserCheck,
   Briefcase,
-  Mail,
   Edit,
   Trash2,
   X,
   PhoneCall,
-  Radio,
   Eye,
-  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   ArrowLeft,
-  Settings,
-  Database,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
@@ -54,12 +49,16 @@ import {
 } from '../services/healthApi';
 import { Button } from '../components/ui/Button';
 import { SEO } from '../components/common/SEO';
+import { DataTable, DataTableColumn } from '../components/ui/DataTable';
 import {
+  BloodDonor,
   BloodGroup,
   Gender,
   EmergencyTicket,
   ContactInquiry,
   TeamMember,
+  VolunteerProfile,
+  Campaign,
   InquiryStatus,
   InquiryCategory,
   VolunteerStatus,
@@ -74,17 +73,48 @@ export type DashboardSection =
   | 'volunteers'
   | 'team'
   | 'donors'
-  | 'campaigns'
-  | 'blood-banks'
-  | 'settings';
+  | 'campaigns';
 
 const BLOOD_GROUPS: BloodGroup[] = ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'];
 const DISTRICTS_NEPAL = ['Parsa', 'Bara', 'Kathmandu', 'Chitwan', 'Dhanusha', 'Morang', 'Rautahat', 'Makwanpur'];
 
 export const DashboardPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<DashboardSection>('overview');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('nhs_dashboard_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setSidebarMobileOpen((prev) => !prev);
+    } else {
+      setSidebarCollapsed((prev) => {
+        const next = !prev;
+        try {
+          localStorage.setItem('nhs_dashboard_sidebar_collapsed', String(next));
+        } catch {}
+        return next;
+      });
+    }
+  };
+
+  // Keyboard shortcut (Ctrl+B / Cmd+B) to toggle sidebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Clock
   useEffect(() => {
@@ -743,12 +773,668 @@ export const DashboardPage: React.FC = () => {
       badgeColor: 'bg-slate-700 text-slate-200',
     },
     { id: 'campaigns', label: 'Camps & Drives', icon: Calendar, badge: campaigns.length },
-    { id: 'blood-banks', label: 'Regional Centers', icon: Building2 },
-    { id: 'settings', label: 'System & Exports', icon: Settings },
   ];
 
+  // DataTable Column Definitions
+  const emergencyColumns: DataTableColumn<EmergencyTicket>[] = useMemo(
+    () => [
+      {
+        key: 'ticketNumber',
+        title: 'Ticket & Service',
+        sortable: true,
+        render: (t) => (
+          <div>
+            <div className="font-mono font-bold text-slate-900">{t.ticketNumber}</div>
+            <div className="text-[10px] font-bold text-rose-600 mt-0.5">
+              {t.sewaType} {t.bloodGroup ? `(${t.bloodGroup})` : ''}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'patientName',
+        title: 'Patient & Age',
+        sortable: true,
+        render: (t) => (
+          <div>
+            <div className="font-bold text-slate-900">{t.patientName}</div>
+            <div className="text-[11px] text-slate-500">
+              {t.patientAge}y · {t.gender}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'hospitalName',
+        title: 'Hospital & Location',
+        sortable: true,
+        render: (t) => (
+          <div>
+            <div className="font-medium text-slate-900">{t.hospitalName}</div>
+            <div className="text-[11px] text-slate-500">{t.hospitalAddress}</div>
+          </div>
+        ),
+      },
+      {
+        key: 'urgency',
+        title: 'Urgency',
+        sortable: true,
+        render: (t) => (
+          <span
+            className={`inline-block px-2 py-0.5 rounded-full font-bold text-[10px] ${
+              t.urgency.startsWith('Immediate')
+                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                : t.urgency.startsWith('Today')
+                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                : 'bg-slate-100 text-slate-600 border border-slate-200'
+            }`}
+          >
+            {t.urgency}
+          </span>
+        ),
+      },
+      {
+        key: 'contact',
+        title: 'Contact Person',
+        render: (t) => (
+          <div>
+            <div className="font-medium text-slate-800">{t.contactName}</div>
+            <a
+              href={`tel:${t.contactMobile}`}
+              className="font-mono font-bold text-rose-600 hover:underline"
+            >
+              {t.contactMobile}
+            </a>
+          </div>
+        ),
+      },
+      {
+        key: 'status',
+        title: 'Status',
+        sortable: true,
+        render: (t) => (
+          <select
+            value={t.status}
+            onChange={(e) =>
+              handleUpdateStatus(t.id, e.target.value as EmergencyTicket['status'])
+            }
+            className="px-2 py-1 rounded-lg text-xs font-bold bg-white border border-slate-200 text-slate-900 cursor-pointer shadow-2xs"
+          >
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Fulfilled">Fulfilled</option>
+            <option value="Closed">Closed</option>
+          </select>
+        ),
+      },
+      {
+        key: 'actions',
+        title: 'Actions',
+        align: 'right',
+        render: (t) => (
+          <div className="inline-flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedTicket(t)}
+              className="h-7 px-2 text-[11px] bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              Details
+            </Button>
+            <button
+              onClick={() => handleDeleteTicket(t.id, t.ticketNumber)}
+              className="p-1.5 rounded-md text-slate-500 hover:text-rose-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Delete Ticket"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const inquiryColumns: DataTableColumn<ContactInquiry>[] = useMemo(
+    () => [
+      {
+        key: 'ticketId',
+        title: 'Ticket ID & Date',
+        sortable: true,
+        render: (inq) => (
+          <div>
+            <div className="font-mono font-bold text-slate-900">{inq.ticketId}</div>
+            <div className="text-[10px] text-slate-400 mt-0.5">{inq.createdAt}</div>
+          </div>
+        ),
+      },
+      {
+        key: 'name',
+        title: 'Citizen Contact',
+        sortable: true,
+        render: (inq) => (
+          <div>
+            <div className="font-bold text-slate-900">{inq.name}</div>
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+              <a
+                href={`tel:${inq.mobile}`}
+                className="font-mono text-rose-600 font-semibold hover:underline"
+              >
+                {inq.mobile}
+              </a>
+              {inq.email && <span>· {inq.email}</span>}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'category',
+        title: 'Category',
+        sortable: true,
+        render: (inq) => (
+          <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+            {inq.category}
+          </span>
+        ),
+      },
+      {
+        key: 'message',
+        title: 'Inquiry Message',
+        render: (inq) => (
+          <div className="max-w-md">
+            <p className="text-xs text-slate-600 line-clamp-2">"{inq.message}"</p>
+            {inq.responseNotes && (
+              <div className="mt-1 text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <strong>Reply:</strong> {inq.responseNotes}
+              </div>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'status',
+        title: 'Status',
+        sortable: true,
+        render: (inq) => (
+          <select
+            value={inq.status}
+            onChange={(e) =>
+              handleUpdateInquiryStatus(inq.id, e.target.value as InquiryStatus)
+            }
+            className="text-[11px] font-bold px-2 py-1 bg-white border border-slate-200 text-slate-900 rounded-md cursor-pointer shadow-2xs"
+          >
+            <option value="New">New</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Archived">Archived</option>
+          </select>
+        ),
+      },
+      {
+        key: 'actions',
+        title: 'Actions',
+        align: 'right',
+        render: (inq) => (
+          <div className="inline-flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedInquiry(inq)}
+              className="h-7 px-2 text-[11px] bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              Respond
+            </Button>
+            <button
+              onClick={() => handleDeleteInquiry(inq.id)}
+              className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-slate-100 rounded-md cursor-pointer"
+              title="Delete Inquiry"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const volunteerColumns: DataTableColumn<VolunteerProfile>[] = useMemo(
+    () => [
+      {
+        key: 'name',
+        title: 'Volunteer & Badges',
+        sortable: true,
+        render: (v) => (
+          <div>
+            <div className="font-bold text-slate-900">{v.name}</div>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="font-mono font-bold text-rose-600 text-xs">{v.bloodGroup}</span>
+              <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                {v.badge}
+              </span>
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'role',
+        title: 'Role & District',
+        sortable: true,
+        render: (v) => (
+          <div>
+            <div className="font-semibold text-slate-800">{v.role}</div>
+            <div className="text-[11px] text-slate-500">
+              {v.city}, {v.district}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'emergencyStandby',
+        title: '24/7 Standby',
+        sortable: true,
+        render: (v) => (
+          <button
+            onClick={() => handleToggleVolunteerStandby(v.id, v.name)}
+            className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors cursor-pointer ${
+              v.emergencyStandby
+                ? 'bg-rose-50 border-rose-200 text-rose-700'
+                : 'bg-slate-100 border-slate-200 text-slate-600'
+            }`}
+          >
+            {v.emergencyStandby ? 'Alert Active' : 'Standby Off'}
+          </button>
+        ),
+      },
+      {
+        key: 'status',
+        title: 'Status',
+        sortable: true,
+        render: (v) => (
+          <span
+            className={`text-xs font-semibold px-2 py-0.5 rounded ${
+              v.status === 'Active'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : v.status === 'On Call'
+                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                : 'bg-slate-100 text-slate-600 border border-slate-200'
+            }`}
+          >
+            {v.status}
+          </span>
+        ),
+      },
+      {
+        key: 'totalDrivesAttended',
+        title: 'Field Activity',
+        sortable: true,
+        render: (v) => (
+          <div className="text-xs text-slate-600">
+            <span className="font-bold text-slate-900 tabular-nums">
+              {v.totalDrivesAttended}
+            </span>{' '}
+            drives ·{' '}
+            <span className="font-bold text-slate-900 tabular-nums">
+              {v.totalDonations}
+            </span>{' '}
+            pints
+          </div>
+        ),
+      },
+      {
+        key: 'mobile',
+        title: 'Emergency Contact',
+        render: (v) => (
+          <div>
+            <a
+              href={`tel:${v.mobile}`}
+              className="font-mono font-bold text-rose-600 hover:underline block text-xs"
+            >
+              {v.mobile}
+            </a>
+            {v.email && (
+              <div className="text-[11px] text-slate-400 truncate max-w-[150px]">
+                {v.email}
+              </div>
+            )}
+          </div>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const teamColumns: DataTableColumn<TeamMember>[] = useMemo(
+    () => [
+      {
+        key: 'name',
+        title: 'Team Member',
+        sortable: true,
+        render: (m) => (
+          <div className="flex items-center gap-3">
+            <img
+              src={m.image || '/img/logo.af0d533f.png'}
+              alt={m.name}
+              className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-2xs shrink-0"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/img/logo.af0d533f.png';
+              }}
+            />
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-slate-900 truncate">{m.name}</span>
+                {m.isCore && (
+                  <span className="text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 px-1.5 py-0.2 rounded">
+                    Core
+                  </span>
+                )}
+              </div>
+              <div className="text-xs font-semibold text-rose-600">{m.role}</div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'department',
+        title: 'Department',
+        sortable: true,
+        render: (m) => (
+          <span className="text-xs font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+            {m.department || 'Emergency Operations'}
+          </span>
+        ),
+      },
+      {
+        key: 'bio',
+        title: 'Bio Summary',
+        render: (m) => (
+          <p className="text-xs text-slate-600 line-clamp-2 max-w-sm italic">
+            "{m.bio}"
+          </p>
+        ),
+      },
+      {
+        key: 'contact',
+        title: 'Direct Contact',
+        render: (m) => (
+          <div className="space-y-0.5 text-xs text-slate-600">
+            {m.phone && (
+              <div>
+                <a
+                  href={`tel:${m.phone}`}
+                  className="font-mono text-rose-600 font-semibold hover:underline"
+                >
+                  {m.phone}
+                </a>
+              </div>
+            )}
+            {m.email && (
+              <div className="text-slate-400 text-[11px] truncate max-w-[140px]">
+                {m.email}
+              </div>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'actions',
+        title: 'Actions',
+        align: 'right',
+        render: (m) => (
+          <div className="inline-flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setEditingTeamMember(m);
+                setNewTeam({
+                  name: m.name,
+                  role: m.role,
+                  bio: m.bio,
+                  image: m.image,
+                  department: m.department || 'Emergency Operations',
+                  phone: m.phone || '',
+                  email: m.email || '',
+                  isCore: m.isCore,
+                  socials: {
+                    facebook: m.socials.facebook || '',
+                    instagram: m.socials.instagram || '',
+                    twitter: m.socials.twitter || '',
+                  },
+                });
+                setShowTeamModal(true);
+              }}
+              className="h-7 px-2 text-[11px] bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              <Edit className="w-3.5 h-3.5 mr-1" />
+              <span>Edit</span>
+            </Button>
+            <button
+              onClick={() => handleDeleteTeam(m.id, m.name)}
+              className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-slate-100 rounded-md cursor-pointer"
+              title="Remove member"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const donorColumns: DataTableColumn<BloodDonor>[] = useMemo(
+    () => [
+      {
+        key: 'name',
+        title: 'Donor Name & Age',
+        sortable: true,
+        sortValue: (d) => `${d.firstName} ${d.lastName}`,
+        render: (d) => (
+          <div>
+            <div className="font-bold text-slate-900">
+              {d.firstName} {d.lastName}
+            </div>
+            <div className="text-[11px] text-slate-500">
+              {d.age}y · {d.gender}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'bloodGroup',
+        title: 'Blood Group',
+        sortable: true,
+        render: (d) => (
+          <span className="font-mono font-extrabold text-xs px-2.5 py-1 rounded bg-rose-50 text-rose-700 border border-rose-200">
+            {d.bloodGroup}
+          </span>
+        ),
+      },
+      {
+        key: 'location',
+        title: 'Location',
+        sortable: true,
+        sortValue: (d) => `${d.city}, ${d.district}`,
+        render: (d) => (
+          <div>
+            <div className="font-medium text-slate-800">{d.city}</div>
+            <div className="text-[11px] text-slate-500">{d.district}</div>
+          </div>
+        ),
+      },
+      {
+        key: 'mobile',
+        title: 'Phone Contact',
+        render: (d) => (
+          <a
+            href={`tel:${d.mobile}`}
+            className="font-mono font-bold text-rose-600 hover:underline"
+          >
+            {d.mobile}
+          </a>
+        ),
+      },
+      {
+        key: 'totalDonations',
+        title: 'Donations',
+        sortable: true,
+        render: (d) => (
+          <div className="text-xs text-slate-700">
+            <span className="font-mono font-bold text-slate-900 tabular-nums">
+              {d.totalDonations || 0}
+            </span>{' '}
+            pints
+          </div>
+        ),
+      },
+      {
+        key: 'isAvailable',
+        title: 'Availability',
+        sortable: true,
+        render: (d) => (
+          <button
+            onClick={() =>
+              handleToggleAvailability(d.id, `${d.firstName} ${d.lastName}`)
+            }
+            className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors cursor-pointer ${
+              d.isAvailable
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                : 'bg-slate-100 border-slate-200 text-slate-600'
+            }`}
+          >
+            {d.isAvailable ? 'Available' : 'Unavailable'}
+          </button>
+        ),
+      },
+      {
+        key: 'actions',
+        title: 'Action',
+        align: 'right',
+        render: (d) => (
+          <a
+            href={`tel:${d.mobile}`}
+            className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white inline-flex items-center justify-center transition-colors"
+            title="Call Donor"
+          >
+            <Phone className="w-3.5 h-3.5" />
+          </a>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const campaignColumns: DataTableColumn<Campaign>[] = useMemo(
+    () => [
+      {
+        key: 'title',
+        title: 'Camp & Organization',
+        sortable: true,
+        render: (camp) => (
+          <div className="flex items-center gap-3">
+            <img
+              src={camp.bannerImage}
+              alt={camp.title}
+              className="w-12 h-10 rounded-lg object-cover border border-slate-200 shrink-0"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src =
+                  '/img/overview.36cb952a.jpg';
+              }}
+            />
+            <div className="min-w-0">
+              <div className="font-bold text-slate-900 truncate max-w-xs">
+                {camp.title}
+              </div>
+              <div className="text-[11px] text-slate-500">{camp.organizerName}</div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: 'date',
+        title: 'Date & Schedule',
+        sortable: true,
+        render: (camp) => (
+          <div className="flex items-center gap-1.5 text-xs text-slate-700">
+            <Calendar className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span className="font-medium">{camp.date}</span>
+          </div>
+        ),
+      },
+      {
+        key: 'location',
+        title: 'Venue & District',
+        sortable: true,
+        sortValue: (c) => `${c.venue}, ${c.district}`,
+        render: (camp) => (
+          <div className="flex items-center gap-1 text-xs text-slate-600">
+            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>
+              {camp.venue}, {camp.district}
+            </span>
+          </div>
+        ),
+      },
+      {
+        key: 'attendance',
+        title: 'Collection',
+        sortable: true,
+        sortValue: (c) => Number(c.unitsCollected || c.attendance) || 0,
+        render: (camp) => (
+          <div className="text-xs text-slate-700">
+            <span className="font-mono font-bold text-rose-600 tabular-nums">
+              {camp.unitsCollected || camp.attendance}
+            </span>{' '}
+            units
+          </div>
+        ),
+      },
+      {
+        key: 'status',
+        title: 'Status',
+        sortable: true,
+        render: (camp) => (
+          <span
+            className={`text-xs font-semibold px-2 py-0.5 rounded ${
+              camp.status === 'Active'
+                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                : camp.status === 'Completed'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-slate-100 text-slate-700 border border-slate-200'
+            }`}
+          >
+            {camp.status}
+          </span>
+        ),
+      },
+      {
+        key: 'actions',
+        title: 'Details',
+        align: 'right',
+        render: (camp) => (
+          <Link to={`/campaign/${camp.slug}`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7 px-2.5 bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              View Camp
+            </Button>
+          </Link>
+        ),
+      },
+    ],
+    []
+  );
+
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-hidden selection:bg-red-500 selection:text-white">
+    <div className="flex h-screen bg-slate-50 text-slate-900 font-sans antialiased overflow-hidden selection:bg-rose-500 selection:text-white">
       <SEO
         title="Admin Command Center | Nepal Health Sewa"
         description="Dedicated operations dashboard for emergency medical triage, citizen enquiries, field volunteer coordination, and leadership management."
@@ -759,54 +1445,80 @@ export const DashboardPage: React.FC = () => {
       {/* 1. LEFT SIDEBAR MENU (Admin Shell) */}
       {/* ========================================================================= */}
       {/* Mobile Backdrop */}
-      {sidebarOpen && (
+      {sidebarMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-xs lg:hidden"
-          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs lg:hidden transition-opacity"
+          onClick={() => setSidebarMobileOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between transition-transform duration-200 ease-in-out ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-white border-r border-slate-200/80 flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 select-none ${
+          sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        } ${sidebarCollapsed ? 'lg:w-20 w-72' : 'w-72'}`}
       >
         {/* Brand Header */}
-        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div
+          className={`p-4 border-b border-slate-200/80 flex items-center ${
+            sidebarCollapsed ? 'lg:justify-center justify-between' : 'justify-between'
+          }`}
+        >
+          <div className={`flex items-center gap-3 overflow-hidden ${sidebarCollapsed ? 'lg:justify-center' : ''}`}>
             <img
               src="/img/logo.af0d533f.png"
               alt="Nepal Health Sewa Logo"
-              className="w-9 h-9 object-contain"
+              className="w-9 h-9 object-contain shrink-0"
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
               }}
             />
-            <div>
-              <div className="font-extrabold text-white text-sm tracking-tight leading-tight flex items-center gap-1.5">
-                <span>Nepal Health Sewa</span>
+            <div className={`${sidebarCollapsed ? 'lg:hidden' : 'block'} min-w-0`}>
+              <div className="font-extrabold text-slate-900 text-sm tracking-tight leading-tight truncate">
+                Nepal Health Sewa
               </div>
-              <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider flex items-center gap-1 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                <span>Command Center v2.5</span>
+              <div className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">
+                Operations & Dispatch Desk
               </div>
             </div>
           </div>
 
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Desktop collapse button inside sidebar header when expanded */}
+            <button
+              onClick={toggleSidebar}
+              className={`hidden lg:flex p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer ${
+                sidebarCollapsed ? 'hidden' : 'flex'
+              }`}
+              title="Collapse Sidebar (Ctrl+B)"
+              aria-label="Collapse Sidebar"
+            >
+              <PanelLeftClose className="w-4 h-4" />
+            </button>
+            {/* Mobile Close Button */}
+            <button
+              onClick={() => setSidebarMobileOpen(false)}
+              className="lg:hidden p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              aria-label="Close Mobile Sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation Section */}
         <div className="flex-1 py-4 px-3 overflow-y-auto space-y-6">
           <div>
-            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <div
+              className={`px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 ${
+                sidebarCollapsed ? 'lg:hidden' : 'block'
+              }`}
+            >
               Core Operations
             </div>
+            {sidebarCollapsed && (
+              <div className="hidden lg:block w-8 mx-auto my-2 border-t border-slate-200/80" />
+            )}
             <nav className="space-y-1">
               {navMenuItems.slice(0, 3).map((item) => {
                 const Icon = item.icon;
@@ -816,26 +1528,33 @@ export const DashboardPage: React.FC = () => {
                     key={item.id}
                     onClick={() => {
                       setActiveSection(item.id);
-                      setSidebarOpen(false);
+                      setSidebarMobileOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    title={sidebarCollapsed ? `${item.label}${item.badge !== undefined ? ` (${item.badge})` : ''}` : undefined}
+                    className={`w-full flex items-center ${
+                      sidebarCollapsed ? 'lg:justify-center lg:px-2 px-3 justify-between' : 'justify-between px-3'
+                    } py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer relative group ${
                       isActive
-                        ? 'bg-red-600 text-white shadow-md shadow-red-950/40 font-bold'
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+                        ? 'bg-rose-600 text-white shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                      <span>{item.label}</span>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                      <span className={`truncate ${sidebarCollapsed ? 'lg:hidden' : 'inline'}`}>{item.label}</span>
                     </div>
                     {item.badge !== undefined && (
                       <span
                         className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md ${
-                          item.badgeColor || 'bg-slate-800 text-slate-300'
-                        }`}
+                          item.badgeColor || 'bg-slate-100 text-slate-600'
+                        } ${sidebarCollapsed ? 'lg:hidden' : 'inline'}`}
                       >
                         {item.badge}
                       </span>
+                    )}
+                    {/* Collapsed Badge Dot Indicator */}
+                    {item.badge !== undefined && sidebarCollapsed && (
+                      <span className="hidden lg:block absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
                     )}
                   </button>
                 );
@@ -844,11 +1563,18 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div>
-            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <div
+              className={`px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 ${
+                sidebarCollapsed ? 'lg:hidden' : 'block'
+              }`}
+            >
               Community & Field
             </div>
+            {sidebarCollapsed && (
+              <div className="hidden lg:block w-8 mx-auto my-2 border-t border-slate-200/80" />
+            )}
             <nav className="space-y-1">
-              {navMenuItems.slice(3, 7).map((item) => {
+              {navMenuItems.slice(3).map((item) => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
                 return (
@@ -856,58 +1582,34 @@ export const DashboardPage: React.FC = () => {
                     key={item.id}
                     onClick={() => {
                       setActiveSection(item.id);
-                      setSidebarOpen(false);
+                      setSidebarMobileOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    title={sidebarCollapsed ? `${item.label}${item.badge !== undefined ? ` (${item.badge})` : ''}` : undefined}
+                    className={`w-full flex items-center ${
+                      sidebarCollapsed ? 'lg:justify-center lg:px-2 px-3 justify-between' : 'justify-between px-3'
+                    } py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer relative group ${
                       isActive
-                        ? 'bg-red-600 text-white shadow-md shadow-red-950/40 font-bold'
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+                        ? 'bg-rose-600 text-white shadow-xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                      <span>{item.label}</span>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                      <span className={`truncate ${sidebarCollapsed ? 'lg:hidden' : 'inline'}`}>{item.label}</span>
                     </div>
                     {item.badge !== undefined && (
                       <span
                         className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md ${
-                          item.badgeColor || 'bg-slate-800 text-slate-300'
-                        }`}
+                          item.badgeColor || 'bg-slate-100 text-slate-600'
+                        } ${sidebarCollapsed ? 'lg:hidden' : 'inline'}`}
                       >
                         {item.badge}
                       </span>
                     )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div>
-            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-              Administration & System
-            </div>
-            <nav className="space-y-1">
-              {navMenuItems.slice(7).map((item) => {
-                const Icon = item.icon;
-                const isActive = activeSection === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveSection(item.id);
-                      setSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-red-600 text-white shadow-md shadow-red-950/40 font-bold'
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                      <span>{item.label}</span>
-                    </div>
+                    {/* Collapsed Badge Dot Indicator */}
+                    {item.badge !== undefined && sidebarCollapsed && (
+                      <span className="hidden lg:block absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                    )}
                   </button>
                 );
               })}
@@ -916,26 +1618,32 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Sidebar Footer with Admin Profile & Public Site Exit */}
-        <div className="p-4 border-t border-slate-800 space-y-3 bg-slate-900/90">
-          <div className="flex items-center gap-3 p-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
-            <div className="w-8 h-8 rounded-full bg-red-600/30 text-red-400 font-bold flex items-center justify-center border border-red-500/50 shrink-0 text-xs font-mono">
+        <div className="p-3 border-t border-slate-200/80 space-y-2 bg-slate-50/80">
+          <div
+            className={`flex items-center ${
+              sidebarCollapsed ? 'lg:justify-center p-1.5' : 'gap-3 p-2'
+            } rounded-xl bg-white border border-slate-200 shadow-2xs`}
+            title={sidebarCollapsed ? 'Duty Admin (Birgunj)' : undefined}
+          >
+            <div className="w-8 h-8 rounded-full bg-rose-50 text-rose-600 font-bold flex items-center justify-center border border-rose-200 shrink-0 text-xs font-mono">
               SK
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-bold text-white truncate">Sangam Kumar Pandit</div>
-              <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Duty Admin (Birgunj)</span>
+            <div className={`min-w-0 flex-1 ${sidebarCollapsed ? 'lg:hidden' : 'block'}`}>
+              <div className="text-[11px] text-emerald-700 font-semibold truncate">
+                Duty Admin (Birgunj)
               </div>
             </div>
           </div>
 
           <Link
             to="/"
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700"
+            title="Switch to Public Website"
+            className={`w-full flex items-center ${
+              sidebarCollapsed ? 'lg:justify-center px-2 py-2' : 'justify-center gap-2 py-2 px-3'
+            } rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all border border-slate-200`}
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-red-400" />
-            <span>Switch to Public Website</span>
+            <ArrowLeft className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+            <span className={`${sidebarCollapsed ? 'lg:hidden' : 'inline'} truncate`}>Switch to Public Website</span>
           </Link>
         </div>
       </aside>
@@ -943,28 +1651,34 @@ export const DashboardPage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 2. RIGHT-SIDE CONTAINER: TOP BAR + MAIN CONTENT */}
       {/* ========================================================================= */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-950">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
         {/* Top Professional Bar */}
-        <header className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 sm:px-8 shrink-0 z-20">
-          <div className="flex items-center gap-4">
+        <header className="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-8 shrink-0 z-20">
+          <div className="flex items-center gap-3 sm:gap-4">
+            {/* Universal Sidebar Toggle Button (Desktop collapse or Mobile drawer) */}
             <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
-              aria-label="Open Sidebar Navigation"
+              onClick={toggleSidebar}
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer border border-slate-200 shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-rose-500/20"
+              title={sidebarCollapsed ? 'Expand Sidebar (Ctrl+B)' : 'Collapse Sidebar (Ctrl+B)'}
+              aria-label={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             >
-              <Menu className="w-5 h-5" />
+              {sidebarCollapsed ? (
+                <PanelLeftOpen className="w-4 h-4 text-slate-700" />
+              ) : (
+                <PanelLeftClose className="w-4 h-4 text-slate-700" />
+              )}
             </button>
 
             {/* Breadcrumb info */}
             <div>
               <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
                 <span>Operations</span>
-                <ChevronRight className="w-3 h-3 text-slate-600" />
-                <span className="text-red-400 font-bold uppercase tracking-wider capitalize">
+                <ChevronRight className="w-3 h-3 text-slate-400" />
+                <span className="text-rose-600 font-bold uppercase tracking-wider capitalize">
                   {activeSection.replace('-', ' ')}
                 </span>
               </div>
-              <h2 className="text-sm sm:text-base font-extrabold text-white capitalize hidden sm:block">
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-900 font-display capitalize hidden sm:block">
                 {activeSection === 'overview'
                   ? 'Real-Time Emergency Command Center'
                   : activeSection === 'emergency'
@@ -977,11 +1691,7 @@ export const DashboardPage: React.FC = () => {
                   ? 'Leadership & Coordinators Registry'
                   : activeSection === 'donors'
                   ? 'Verified Blood Donor Directory'
-                  : activeSection === 'campaigns'
-                  ? 'Community Donation Camps Tracker'
-                  : activeSection === 'blood-banks'
-                  ? 'Certified Blood Centers Directory'
-                  : 'System Configuration & Data Export'}
+                  : 'Community Donation Camps Tracker'}
               </h2>
             </div>
           </div>
@@ -989,18 +1699,18 @@ export const DashboardPage: React.FC = () => {
           {/* Right Action Icons & Clocks */}
           <div className="flex items-center gap-3">
             {/* Live Clock Nepal */}
-            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs font-mono font-bold text-slate-300">
-              <Clock className="w-3.5 h-3.5 text-red-400" />
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-xs font-mono font-bold text-slate-700">
+              <Clock className="w-3.5 h-3.5 text-rose-600" />
               <span>NPT {currentTime || 'Loading...'}</span>
             </div>
 
             {/* Emergency Hotline Speed Dial */}
             <a
               href="tel:051521993"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600/20 border border-red-500/40 text-red-300 hover:bg-red-600/30 text-xs font-bold transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 text-xs font-bold transition-colors"
               title="Quick Dial Narayani Hospital Blood Bank"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-red-400" />
+              <PhoneCall className="w-3.5 h-3.5 text-rose-600" />
               <span>Hotline 051-521993</span>
             </a>
 
@@ -1009,7 +1719,7 @@ export const DashboardPage: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={exportTicketsCSV}
-              className="hidden sm:inline-flex text-xs h-8 px-2.5 bg-slate-800 border-slate-700 text-slate-200 hover:text-white"
+              className="hidden sm:inline-flex text-xs h-8 px-2.5 bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 mr-1 text-emerald-400" />
               <span>Export CSV</span>
@@ -1020,7 +1730,7 @@ export const DashboardPage: React.FC = () => {
               variant="destructive"
               size="sm"
               onClick={() => setShowTicketModal(true)}
-              className="text-xs font-bold h-8 px-3 shadow-md shadow-red-950/50"
+              className="text-xs font-bold h-8 px-3 shadow-xs"
             >
               <Plus className="w-3.5 h-3.5 mr-1" />
               <span>New Dispatch</span>
@@ -1029,7 +1739,8 @@ export const DashboardPage: React.FC = () => {
         </header>
 
         {/* Main Content Area (Right Side) */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 bg-slate-950 text-slate-100">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 bg-slate-50 text-slate-900">
+          <div key={activeSection} className="page-transition">
           {/* ========================================================================= */}
           {/* VIEW 1: OVERVIEW */}
           {/* ========================================================================= */}
@@ -1037,24 +1748,24 @@ export const DashboardPage: React.FC = () => {
             <div className="space-y-8 max-w-7xl mx-auto">
               {/* Top Row: Executive Stats */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800/80 shadow-xs space-y-2">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-2">
                   <div className="flex items-center justify-between text-slate-400">
                     <span className="text-xs font-semibold uppercase tracking-wider">Active Emergency</span>
                     <AlertTriangle className="w-4 h-4 text-red-500" />
                   </div>
-                  <div className="text-3xl font-extrabold text-white font-mono">{activeTickets}</div>
-                  <div className="text-[11px] font-bold text-red-400 flex items-center gap-1">
+                  <div className="text-3xl font-extrabold text-slate-900 font-mono">{activeTickets}</div>
+                  <div className="text-[11px] font-bold text-rose-600 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
                     <span>{urgentTickets} requiring 2h surgical intake</span>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800/80 shadow-xs space-y-2">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-2">
                   <div className="flex items-center justify-between text-slate-400">
                     <span className="text-xs font-semibold uppercase tracking-wider">Available Donors</span>
                     <Droplet className="w-4 h-4 text-red-500 fill-current" />
                   </div>
-                  <div className="text-3xl font-extrabold text-white font-mono">
+                  <div className="text-3xl font-extrabold text-slate-900 font-mono">
                     {availableDonors} <span className="text-sm font-sans font-normal text-slate-500">/ {totalDonors}</span>
                   </div>
                   <div className="text-[11px] font-medium text-emerald-400">
@@ -1062,34 +1773,34 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800/80 shadow-xs space-y-2">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-2">
                   <div className="flex items-center justify-between text-slate-400">
                     <span className="text-xs font-semibold uppercase tracking-wider">Citizen Enquiries</span>
                     <MessageSquare className="w-4 h-4 text-sky-400" />
                   </div>
-                  <div className="text-3xl font-extrabold text-white font-mono">{inquiries.length}</div>
+                  <div className="text-3xl font-extrabold text-slate-900 font-mono">{inquiries.length}</div>
                   <div className="text-[11px] font-medium text-sky-400">
                     {newInquiriesCount} new messages pending response
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800/80 shadow-xs space-y-2">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-2">
                   <div className="flex items-center justify-between text-slate-400">
                     <span className="text-xs font-semibold uppercase tracking-wider">Field Volunteers</span>
                     <UserCheck className="w-4 h-4 text-purple-400" />
                   </div>
-                  <div className="text-3xl font-extrabold text-white font-mono">{activeVolunteersCount}</div>
+                  <div className="text-3xl font-extrabold text-slate-900 font-mono">{activeVolunteersCount}</div>
                   <div className="text-[11px] font-medium text-purple-400">
                     {standbyVolunteersCount} active on 24/7 emergency standby
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800/80 shadow-xs space-y-2">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-2">
                   <div className="flex items-center justify-between text-slate-400">
                     <span className="text-xs font-semibold uppercase tracking-wider">Rare Rh-Negative</span>
                     <ShieldCheck className="w-4 h-4 text-amber-400" />
                   </div>
-                  <div className="text-3xl font-extrabold text-white font-mono">{rareDonorsCount}</div>
+                  <div className="text-3xl font-extrabold text-slate-900 font-mono">{rareDonorsCount}</div>
                   <div className="text-[11px] font-medium text-amber-400">
                     Verified O-, A-, B-, AB- network
                   </div>
@@ -1097,10 +1808,10 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               {/* Real-time ABO Stock Barometer */}
-              <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm space-y-5">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                       <Droplet className="w-4 h-4 text-red-500 fill-current" />
                       <span>ABO & Rh Blood Stock Barometer</span>
                     </h3>
@@ -1112,7 +1823,7 @@ export const DashboardPage: React.FC = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setActiveSection('donors')}
-                    className="text-xs h-7 px-3 bg-slate-800 border-slate-700 text-slate-200 self-start sm:self-auto"
+                    className="text-xs h-7 px-3 bg-white border-slate-200 text-slate-700 hover:bg-slate-50 self-start sm:self-auto"
                   >
                     <span>View Donor Pool</span>
                     <ChevronRight className="w-3.5 h-3.5 ml-1" />
@@ -1125,12 +1836,12 @@ export const DashboardPage: React.FC = () => {
                       key={item.group}
                       className={`p-3.5 rounded-xl border text-center transition-all ${
                         item.status === 'Critical'
-                          ? 'bg-rose-950/40 border-rose-800/80 text-rose-300'
+                          ? 'bg-rose-50 border-rose-200 text-rose-700'
                           : item.status === 'Low'
-                          ? 'bg-amber-950/40 border-amber-800/80 text-amber-300'
+                          ? 'bg-amber-50 border-amber-200 text-amber-700'
                           : item.status === 'Moderate'
-                          ? 'bg-sky-950/40 border-sky-800/80 text-sky-300'
-                          : 'bg-emerald-950/40 border-emerald-800/80 text-emerald-300'
+                          ? 'bg-sky-50 border-sky-200 text-sky-700'
+                          : 'bg-emerald-50 border-emerald-200 text-emerald-700'
                       }`}
                     >
                       <div className="text-base font-extrabold font-mono text-white">{item.group}</div>
@@ -1147,15 +1858,15 @@ export const DashboardPage: React.FC = () => {
               {/* Split Feed: Active Emergencies & Inquiries */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Active Emergency Requests (7 cols) */}
-                <div className="lg:col-span-7 p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm space-y-4">
+                <div className="lg:col-span-7 p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-red-500" />
                       <span>Live Hospital Triage Queue</span>
                     </h3>
                     <button
                       onClick={() => setActiveSection('emergency')}
-                      className="text-xs font-semibold text-red-400 hover:text-red-300 flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-semibold text-rose-600 hover:text-red-300 flex items-center gap-1 cursor-pointer"
                     >
                       <span>All requests ({tickets.length})</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -1166,11 +1877,11 @@ export const DashboardPage: React.FC = () => {
                     {tickets.slice(0, 4).map((ticket) => (
                       <div
                         key={ticket.id}
-                        className="p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors"
+                        className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors"
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-bold text-white">{ticket.ticketNumber}</span>
+                            <span className="font-mono text-xs font-bold text-slate-900">{ticket.ticketNumber}</span>
                             <span
                               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                 ticket.status === 'Pending'
@@ -1179,7 +1890,7 @@ export const DashboardPage: React.FC = () => {
                                   ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
                                   : ticket.status === 'Fulfilled'
                                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                  : 'bg-slate-800 text-slate-400'
+                                  : 'bg-slate-100 text-slate-600 border border-slate-200'
                               }`}
                             >
                               {ticket.status}
@@ -1189,7 +1900,7 @@ export const DashboardPage: React.FC = () => {
                             </span>
                           </div>
 
-                          <div className="text-xs font-bold text-slate-200">
+                          <div className="text-xs font-bold text-slate-800">
                             {ticket.patientName} ({ticket.patientAge}y) · {ticket.hospitalName}
                           </div>
 
@@ -1204,7 +1915,7 @@ export const DashboardPage: React.FC = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedTicket(ticket)}
-                            className="text-xs h-7 px-2.5 bg-slate-800 border-slate-700 text-slate-200"
+                            className="text-xs h-7 px-2.5 bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
                           >
                             <Eye className="w-3.5 h-3.5 mr-1" />
                             <span>View</span>
@@ -1224,9 +1935,9 @@ export const DashboardPage: React.FC = () => {
                 </div>
 
                 {/* Citizen Enquiries (5 cols) */}
-                <div className="lg:col-span-5 p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm space-y-4">
+                <div className="lg:col-span-5 p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                       <MessageSquare className="w-4 h-4 text-sky-400" />
                       <span>Citizen & Hospital Enquiries</span>
                     </h3>
@@ -1243,10 +1954,10 @@ export const DashboardPage: React.FC = () => {
                     {inquiries.slice(0, 4).map((inq) => (
                       <div
                         key={inq.id}
-                        className="p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 space-y-1.5"
+                        className="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/70 space-y-1.5"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-mono text-xs font-bold text-slate-300">{inq.ticketId}</span>
+                          <span className="font-mono text-xs font-bold text-slate-700">{inq.ticketId}</span>
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                               inq.status === 'New'
@@ -1255,17 +1966,17 @@ export const DashboardPage: React.FC = () => {
                                 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                                 : inq.status === 'Resolved'
                                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                : 'bg-slate-800 text-slate-400'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200'
                             }`}
                           >
                             {inq.status}
                           </span>
                         </div>
-                        <div className="text-xs font-bold text-white">{inq.name}</div>
+                        <div className="text-xs font-bold text-slate-900">{inq.name}</div>
                         <p className="text-[11px] text-slate-400 line-clamp-2">"{inq.message}"</p>
-                        <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[10px] text-slate-500">
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-200/80 text-[10px] text-slate-500">
                           <span>{inq.category}</span>
-                          <a href={`tel:${inq.mobile}`} className="text-red-400 font-bold hover:underline">
+                          <a href={`tel:${inq.mobile}`} className="text-rose-600 font-bold hover:underline">
                             {inq.mobile}
                           </a>
                         </div>
@@ -1282,178 +1993,91 @@ export const DashboardPage: React.FC = () => {
           {/* ========================================================================= */}
           {activeSection === 'emergency' && (
             <div className="space-y-6 max-w-7xl mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-red-500" />
-                    <span>24/7 Medical Emergency Triage Queue</span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Live coordination for blood units, high-pressure oxygen, and basic/advanced ambulance dispatch.
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-red-500" />
+                  <span>24/7 Medical Emergency Triage Queue</span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Live coordination for blood units, high-pressure oxygen, and basic/advanced ambulance dispatch.
+                </p>
+              </div>
 
-                <div className="flex items-center gap-2">
+              <DataTable<EmergencyTicket>
+                data={filteredTickets}
+                columns={emergencyColumns}
+                keyExtractor={(t) => t.id}
+                searchPlaceholder="Search patient, hospital, ticket..."
+                searchValue={ticketSearch}
+                onSearchChange={setTicketSearch}
+                filters={[
+                  {
+                    id: 'status',
+                    value: ticketStatusFilter,
+                    onChange: setTicketStatusFilter,
+                    options: [
+                      { label: 'All Statuses', value: 'ALL' },
+                      { label: 'Pending (Unassigned)', value: 'Pending' },
+                      { label: 'In Progress (Mobilizing)', value: 'In Progress' },
+                      { label: 'Fulfilled (Delivered)', value: 'Fulfilled' },
+                      { label: 'Closed', value: 'Closed' },
+                    ],
+                  },
+                  {
+                    id: 'urgency',
+                    value: ticketUrgencyFilter,
+                    onChange: setTicketUrgencyFilter,
+                    options: [
+                      { label: 'All Urgencies', value: 'ALL' },
+                      { label: 'Immediate (Within 2 hrs)', value: 'Immediate (Within 2 hrs)' },
+                      { label: 'Today (Within 6 hrs)', value: 'Today (Within 6 hrs)' },
+                      { label: 'Scheduled', value: 'Scheduled' },
+                    ],
+                  },
+                  {
+                    id: 'sewa',
+                    value: ticketSewaFilter,
+                    onChange: setTicketSewaFilter,
+                    options: [
+                      { label: 'All Services', value: 'ALL' },
+                      { label: 'Blood Transfusion', value: 'Blood' },
+                      { label: 'Oxygen Cylinder', value: 'Oxygen' },
+                      { label: 'Ambulance Transit', value: 'Ambulance' },
+                      { label: 'Hospital ICU Bed', value: 'Bed Availability' },
+                      { label: 'Medicine Supply', value: 'Medicine' },
+                    ],
+                  },
+                ]}
+                actions={
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => setShowTicketModal(true)}
-                    className="text-xs font-bold"
+                    className="text-xs font-bold shadow-xs"
                   >
                     <Plus className="w-4 h-4 mr-1" />
                     <span>New Emergency Dispatch</span>
                   </Button>
-                </div>
-              </div>
-
-              {/* Filters */}
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Search patient, hospital, ticket..."
-                    value={ticketSearch}
-                    onChange={(e) => setTicketSearch(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white placeholder-slate-500 focus:outline-hidden focus:border-red-500"
-                  />
-                </div>
-
-                <select
-                  value={ticketStatusFilter}
-                  onChange={(e) => setTicketStatusFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Statuses</option>
-                  <option value="Pending">Pending (Unassigned)</option>
-                  <option value="In Progress">In Progress (Mobilizing)</option>
-                  <option value="Fulfilled">Fulfilled (Delivered)</option>
-                  <option value="Closed">Closed</option>
-                </select>
-
-                <select
-                  value={ticketUrgencyFilter}
-                  onChange={(e) => setTicketUrgencyFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Urgencies</option>
-                  <option value="Immediate (Within 2 hrs)">Immediate (Within 2 hrs)</option>
-                  <option value="Today (Within 6 hrs)">Today (Within 6 hrs)</option>
-                  <option value="Scheduled">Scheduled Procedure</option>
-                </select>
-
-                <select
-                  value={ticketSewaFilter}
-                  onChange={(e) => setTicketSewaFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Services</option>
-                  <option value="Blood">Blood Transfusion</option>
-                  <option value="Oxygen">Oxygen Cylinder</option>
-                  <option value="Ambulance">Ambulance Transit</option>
-                  <option value="Bed Availability">Hospital ICU Bed</option>
-                  <option value="Medicine">Medicine Supply</option>
-                </select>
-              </div>
-
-              {/* Table */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-slate-800">
-                      <tr>
-                        <th className="py-3.5 px-4">Ticket & Service</th>
-                        <th className="py-3.5 px-4">Patient & Age</th>
-                        <th className="py-3.5 px-4">Hospital & Location</th>
-                        <th className="py-3.5 px-4">Urgency</th>
-                        <th className="py-3.5 px-4">Contact Person</th>
-                        <th className="py-3.5 px-4">Status</th>
-                        <th className="py-3.5 px-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800">
-                      {filteredTickets.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="py-12 text-center text-slate-500">
-                            No emergency tickets match your search filters.
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredTickets.map((t) => (
-                          <tr key={t.id} className="hover:bg-slate-800/40 transition-colors">
-                            <td className="py-3.5 px-4">
-                              <div className="font-mono font-bold text-white">{t.ticketNumber}</div>
-                              <div className="text-[10px] font-bold text-red-400 mt-0.5">
-                                {t.sewaType} {t.bloodGroup ? `(${t.bloodGroup})` : ''}
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <div className="font-bold text-slate-200">{t.patientName}</div>
-                              <div className="text-[11px] text-slate-400">{t.patientAge}y · {t.gender}</div>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <div className="font-medium text-slate-200">{t.hospitalName}</div>
-                              <div className="text-[11px] text-slate-500">{t.hospitalAddress}</div>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span
-                                className={`inline-block px-2 py-0.5 rounded-full font-bold text-[10px] ${
-                                  t.urgency.startsWith('Immediate')
-                                    ? 'bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse'
-                                    : t.urgency.startsWith('Today')
-                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                                    : 'bg-slate-800 text-slate-400'
-                                }`}
-                              >
-                                {t.urgency}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <div className="font-medium text-slate-200">{t.contactName}</div>
-                              <a href={`tel:${t.contactMobile}`} className="font-mono font-bold text-red-400 hover:underline">
-                                {t.contactMobile}
-                              </a>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <select
-                                value={t.status}
-                                onChange={(e) =>
-                                  handleUpdateStatus(t.id, e.target.value as EmergencyTicket['status'])
-                                }
-                                className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-950 border border-slate-700 text-white cursor-pointer"
-                              >
-                                <option value="Pending">Pending</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Fulfilled">Fulfilled</option>
-                                <option value="Closed">Closed</option>
-                              </select>
-                            </td>
-                            <td className="py-3.5 px-4 text-right">
-                              <div className="inline-flex items-center gap-1.5">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setSelectedTicket(t)}
-                                  className="h-7 px-2 text-[11px] bg-slate-800 border-slate-700 text-slate-200"
-                                >
-                                  Details
-                                </Button>
-                                <button
-                                  onClick={() => handleDeleteTicket(t.id, t.ticketNumber)}
-                                  className="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors"
-                                  title="Delete Ticket"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                }
+                onResetFilters={() => {
+                  setTicketStatusFilter('ALL');
+                  setTicketUrgencyFilter('ALL');
+                  setTicketSewaFilter('ALL');
+                  setTicketSearch('');
+                }}
+                hasActiveFilters={
+                  ticketStatusFilter !== 'ALL' ||
+                  ticketUrgencyFilter !== 'ALL' ||
+                  ticketSewaFilter !== 'ALL'
+                }
+                emptyTitle="No emergency tickets found"
+                emptyDescription="No emergency dispatch tickets match your search filters."
+                emptyActionText="New Emergency Dispatch"
+                onEmptyAction={() => setShowTicketModal(true)}
+                paginated={true}
+                initialPageSize={10}
+                pageSizeOptions={[5, 10, 20, 50]}
+              />
             </div>
           )}
 
@@ -1462,18 +2086,51 @@ export const DashboardPage: React.FC = () => {
           {/* ========================================================================= */}
           {activeSection === 'inquiries' && (
             <div className="space-y-6 max-w-7xl mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-sky-400" />
-                    <span>Citizen & Hospital Enquiries Desk</span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Track partnership proposals, camp organization inquiries, donor eligibility questions, and citizen feedback.
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-sky-500" />
+                  <span>Citizen & Hospital Enquiries Desk</span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Track partnership proposals, camp organization inquiries, donor eligibility questions, and citizen feedback.
+                </p>
+              </div>
 
-                <div className="flex items-center gap-2">
+              <DataTable<ContactInquiry>
+                data={filteredInquiries}
+                columns={inquiryColumns}
+                keyExtractor={(inq) => inq.id}
+                searchPlaceholder="Search citizen, phone, message..."
+                searchValue={inquirySearch}
+                onSearchChange={setInquirySearch}
+                filters={[
+                  {
+                    id: 'status',
+                    value: inquiryStatusFilter,
+                    onChange: setInquiryStatusFilter,
+                    options: [
+                      { label: 'All Statuses', value: 'ALL' },
+                      { label: 'New (Unresponded)', value: 'New' },
+                      { label: 'In Progress', value: 'In Progress' },
+                      { label: 'Resolved', value: 'Resolved' },
+                      { label: 'Archived', value: 'Archived' },
+                    ],
+                  },
+                  {
+                    id: 'category',
+                    value: inquiryCategoryFilter,
+                    onChange: setInquiryCategoryFilter,
+                    options: [
+                      { label: 'All Categories', value: 'ALL' },
+                      { label: 'Hospital Partnership', value: 'Hospital Partnership' },
+                      { label: 'Camp Organization', value: 'Camp Organization' },
+                      { label: 'Donor Inquiry', value: 'Donor Inquiry' },
+                      { label: 'Emergency Assistance', value: 'Emergency Assistance' },
+                      { label: 'General Feedback', value: 'General Feedback' },
+                    ],
+                  },
+                ]}
+                actions={
                   <Button
                     variant="primary"
                     size="sm"
@@ -1483,135 +2140,23 @@ export const DashboardPage: React.FC = () => {
                     <Plus className="w-4 h-4 mr-1" />
                     <span>Log Citizen Inquiry</span>
                   </Button>
-                </div>
-              </div>
-
-              {/* Filter */}
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Search name, phone, message..."
-                    value={inquirySearch}
-                    onChange={(e) => setInquirySearch(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white"
-                  />
-                </div>
-
-                <select
-                  value={inquiryStatusFilter}
-                  onChange={(e) => setInquiryStatusFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Statuses</option>
-                  <option value="New">New (Unresponded)</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Resolved">Resolved</option>
-                  <option value="Archived">Archived</option>
-                </select>
-
-                <select
-                  value={inquiryCategoryFilter}
-                  onChange={(e) => setInquiryCategoryFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Categories</option>
-                  <option value="Hospital Partnership">Hospital Partnership</option>
-                  <option value="Camp Organization">Camp Organization</option>
-                  <option value="Donor Inquiry">Donor Inquiry</option>
-                  <option value="Emergency Assistance">Emergency Assistance</option>
-                  <option value="General Feedback">General Feedback</option>
-                </select>
-              </div>
-
-              {/* Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredInquiries.map((inq) => (
-                  <div
-                    key={inq.id}
-                    className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-700 transition-colors shadow-sm"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-xs font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded">
-                          {inq.ticketId}
-                        </span>
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            inq.status === 'New'
-                              ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
-                              : inq.status === 'In Progress'
-                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                              : inq.status === 'Resolved'
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                              : 'bg-slate-800 text-slate-400'
-                          }`}
-                        >
-                          {inq.status}
-                        </span>
-                      </div>
-
-                      <div>
-                        <div className="text-sm font-bold text-white">{inq.name}</div>
-                        <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                          <a href={`tel:${inq.mobile}`} className="font-mono text-red-400 font-semibold hover:underline">
-                            {inq.mobile}
-                          </a>
-                          {inq.email && <span>· {inq.email}</span>}
-                        </div>
-                      </div>
-
-                      <div className="inline-block text-[11px] font-semibold text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded">
-                        Category: {inq.category}
-                      </div>
-
-                      <p className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3 rounded-lg border border-slate-800">
-                        "{inq.message}"
-                      </p>
-
-                      {inq.responseNotes && (
-                        <div className="text-[11px] text-emerald-300 bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-800/50">
-                          <strong>Response Note:</strong> {inq.responseNotes}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
-                      <select
-                        value={inq.status}
-                        onChange={(e) =>
-                          handleUpdateInquiryStatus(inq.id, e.target.value as InquiryStatus)
-                        }
-                        className="text-[11px] font-bold px-2 py-1 bg-slate-950 border border-slate-700 text-white rounded-md cursor-pointer"
-                      >
-                        <option value="New">New</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Resolved">Resolved</option>
-                        <option value="Archived">Archived</option>
-                      </select>
-
-                      <div className="flex items-center gap-1.5">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedInquiry(inq)}
-                          className="h-7 px-2 text-[11px] bg-slate-800 border-slate-700 text-slate-200"
-                        >
-                          Respond
-                        </Button>
-                        <button
-                          onClick={() => handleDeleteInquiry(inq.id)}
-                          className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-md"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                }
+                onResetFilters={() => {
+                  setInquiryStatusFilter('ALL');
+                  setInquiryCategoryFilter('ALL');
+                  setInquirySearch('');
+                }}
+                hasActiveFilters={
+                  inquiryStatusFilter !== 'ALL' || inquiryCategoryFilter !== 'ALL'
+                }
+                emptyTitle="No citizen inquiries found"
+                emptyDescription="No customer or partner inquiries match your current filters."
+                emptyActionText="Log Citizen Inquiry"
+                onEmptyAction={() => setShowInquiryModal(true)}
+                paginated={true}
+                initialPageSize={10}
+                pageSizeOptions={[5, 10, 20, 50]}
+              />
             </div>
           )}
 
@@ -1620,18 +2165,57 @@ export const DashboardPage: React.FC = () => {
           {/* ========================================================================= */}
           {activeSection === 'volunteers' && (
             <div className="space-y-6 max-w-7xl mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <UserCheck className="w-5 h-5 text-emerald-400" />
-                    <span>Field Volunteers & Community Responders</span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Manage youth responders, emergency cold-chain escorts, and hospital liaison coordinators.
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <UserCheck className="w-5 h-5 text-emerald-500" />
+                  <span>Field Volunteers & Community Responders</span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Manage youth responders, emergency cold-chain escorts, and hospital liaison coordinators across Nepal.
+                </p>
+              </div>
 
-                <div className="flex items-center gap-2">
+              <DataTable<VolunteerProfile>
+                data={filteredVolunteers}
+                columns={volunteerColumns}
+                keyExtractor={(v) => v.id}
+                searchPlaceholder="Search volunteer, role, city..."
+                searchValue={volunteerSearch}
+                onSearchChange={setVolunteerSearch}
+                filters={[
+                  {
+                    id: 'district',
+                    value: volunteerDistrictFilter,
+                    onChange: setVolunteerDistrictFilter,
+                    options: [
+                      { label: 'All Districts', value: 'ALL' },
+                      ...DISTRICTS_NEPAL.map((d) => ({ label: d, value: d })),
+                    ],
+                  },
+                  {
+                    id: 'status',
+                    value: volunteerStatusFilter,
+                    onChange: setVolunteerStatusFilter,
+                    options: [
+                      { label: 'All Statuses', value: 'ALL' },
+                      { label: 'Active', value: 'Active' },
+                      { label: 'On Call', value: 'On Call' },
+                      { label: 'Inactive', value: 'Inactive' },
+                    ],
+                  },
+                ]}
+                customFilters={
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
+                    <input
+                      type="checkbox"
+                      checked={volunteerStandbyOnly}
+                      onChange={(e) => setVolunteerStandbyOnly(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
+                    />
+                    <span>24/7 Standby Only</span>
+                  </label>
+                }
+                actions={
                   <Button
                     variant="primary"
                     size="sm"
@@ -1641,137 +2225,26 @@ export const DashboardPage: React.FC = () => {
                     <Plus className="w-4 h-4 mr-1" />
                     <span>Register Volunteer</span>
                   </Button>
-                </div>
-              </div>
-
-              {/* Filters */}
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Search volunteer, city..."
-                    value={volunteerSearch}
-                    onChange={(e) => setVolunteerSearch(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white"
-                  />
-                </div>
-
-                <select
-                  value={volunteerDistrictFilter}
-                  onChange={(e) => setVolunteerDistrictFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Districts</option>
-                  {DISTRICTS_NEPAL.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={volunteerStatusFilter}
-                  onChange={(e) => setVolunteerStatusFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Statuses</option>
-                  <option value="Active">Active</option>
-                  <option value="On Call">On Call</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={volunteerStandbyOnly}
-                    onChange={(e) => setVolunteerStandbyOnly(e.target.checked)}
-                    className="w-4 h-4 rounded text-red-600 focus:ring-red-500"
-                  />
-                  <span>24/7 Standby Responders Only</span>
-                </label>
-              </div>
-
-              {/* Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredVolunteers.map((vol) => (
-                  <div
-                    key={vol.id}
-                    className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-700 transition-colors shadow-sm"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                          {vol.badge}
-                        </span>
-
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={`w-2 h-2 rounded-full ${
-                              vol.status === 'Active' ? 'bg-emerald-400' : 'bg-amber-400'
-                            }`}
-                          />
-                          <span className="text-[11px] font-bold text-slate-300">{vol.status}</span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="text-base font-bold text-white flex items-center justify-between">
-                          <span>{vol.name}</span>
-                          <span className="text-xs font-mono font-bold text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-800/60">
-                            {vol.bloodGroup}
-                          </span>
-                        </h4>
-                        <div className="text-xs text-slate-400 mt-0.5">
-                          {vol.role} · {vol.city}, {vol.district}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {vol.skills.map((skill, idx) => (
-                          <span
-                            key={idx}
-                            className="text-[10px] font-semibold bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800 text-center">
-                        <div className="bg-slate-950 p-2 rounded-lg border border-slate-800">
-                          <div className="text-xs font-bold text-white font-mono">{vol.totalDrivesAttended}</div>
-                          <div className="text-[10px] text-slate-400">Camps Attended</div>
-                        </div>
-                        <div className="bg-slate-950 p-2 rounded-lg border border-slate-800">
-                          <div className="text-xs font-bold text-red-400 font-mono">{vol.totalDonations}</div>
-                          <div className="text-[10px] text-slate-400">Pints Donated</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
-                      <button
-                        onClick={() => handleToggleVolunteerStandby(vol.id, vol.name)}
-                        className={`text-[11px] font-bold px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
-                          vol.emergencyStandby
-                            ? 'bg-rose-950/60 border-rose-800 text-rose-300'
-                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-                        }`}
-                      >
-                        <Radio className={`w-3.5 h-3.5 ${vol.emergencyStandby ? 'animate-pulse text-red-400' : ''}`} />
-                        <span>{vol.emergencyStandby ? 'On Standby' : 'Set Standby'}</span>
-                      </button>
-
-                      <a
-                        href={`tel:${vol.mobile}`}
-                        className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors"
-                        title={`Call ${vol.name}`}
-                      >
-                        <PhoneCall className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                }
+                onResetFilters={() => {
+                  setVolunteerDistrictFilter('ALL');
+                  setVolunteerStatusFilter('ALL');
+                  setVolunteerStandbyOnly(false);
+                  setVolunteerSearch('');
+                }}
+                hasActiveFilters={
+                  volunteerDistrictFilter !== 'ALL' ||
+                  volunteerStatusFilter !== 'ALL' ||
+                  volunteerStandbyOnly
+                }
+                emptyTitle="No volunteers found"
+                emptyDescription="No field volunteers match your search and filter criteria."
+                emptyActionText="Register Volunteer"
+                onEmptyAction={() => setShowVolunteerModal(true)}
+                paginated={true}
+                initialPageSize={10}
+                pageSizeOptions={[5, 10, 20, 50]}
+              />
             </div>
           )}
 
@@ -1780,18 +2253,40 @@ export const DashboardPage: React.FC = () => {
           {/* ========================================================================= */}
           {activeSection === 'team' && (
             <div className="space-y-6 max-w-7xl mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Briefcase className="w-5 h-5 text-indigo-400" />
-                    <span>Leadership & Operational Team Registry</span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Manage organization founders, executive leads, coordinators, and medical advisors of Nepal Health Sewa.
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-indigo-500" />
+                  <span>Leadership & Operational Team Registry</span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Manage organization founders, executive leads, coordinators, and medical advisors of Nepal Health Sewa.
+                </p>
+              </div>
 
-                <div className="flex items-center gap-2">
+              <DataTable<TeamMember>
+                data={filteredTeam}
+                columns={teamColumns}
+                keyExtractor={(m) => m.id}
+                searchPlaceholder="Search name, role, bio..."
+                searchValue={teamSearch}
+                onSearchChange={setTeamSearch}
+                filters={[
+                  {
+                    id: 'department',
+                    value: teamDepartmentFilter,
+                    onChange: setTeamDepartmentFilter,
+                    options: [
+                      { label: 'All Departments', value: 'ALL' },
+                      { label: 'Leadership', value: 'Leadership' },
+                      { label: 'Emergency Operations', value: 'Emergency Operations' },
+                      { label: 'Donor Relations', value: 'Donor Relations' },
+                      { label: 'Logistics', value: 'Logistics' },
+                      { label: 'Medical Advisory', value: 'Medical Advisory' },
+                      { label: 'Youth Wing', value: 'Youth Wing' },
+                    ],
+                  },
+                ]}
+                actions={
                   <Button
                     variant="primary"
                     size="sm"
@@ -1804,166 +2299,23 @@ export const DashboardPage: React.FC = () => {
                     <Plus className="w-4 h-4 mr-1" />
                     <span>Add Team Member</span>
                   </Button>
-                </div>
-              </div>
-
-              {/* Filters */}
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Search name, role, bio..."
-                    value={teamSearch}
-                    onChange={(e) => setTeamSearch(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white"
-                  />
-                </div>
-
-                <select
-                  value={teamDepartmentFilter}
-                  onChange={(e) => setTeamDepartmentFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Departments</option>
-                  <option value="Leadership">Leadership</option>
-                  <option value="Emergency Operations">Emergency Operations</option>
-                  <option value="Donor Relations">Donor Relations</option>
-                  <option value="Logistics">Logistics</option>
-                  <option value="Medical Advisory">Medical Advisory</option>
-                  <option value="Youth Wing">Youth Wing</option>
-                </select>
-              </div>
-
-              {/* Team Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredTeam.map((member) => (
-                  <div
-                    key={member.id}
-                    className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-700 transition-colors shadow-sm"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3.5">
-                        <img
-                          src={member.image || '/img/logo.af0d533f.png'}
-                          alt={member.name}
-                          className="w-14 h-14 rounded-full object-cover border-2 border-red-500 shadow-xs shrink-0"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = '/img/logo.af0d533f.png';
-                          }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <h4 className="text-base font-bold text-white truncate">{member.name}</h4>
-                            {member.isCore && (
-                              <span className="text-[10px] font-extrabold bg-red-600/30 text-red-300 border border-red-500/40 px-1.5 py-0.5 rounded">
-                                Core
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-xs font-semibold text-red-400 mt-0.5">{member.role}</div>
-                          {member.department && (
-                            <div className="text-[11px] text-slate-400 font-medium">{member.department}</div>
-                          )}
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-slate-300 leading-relaxed italic bg-slate-950 p-3 rounded-lg border border-slate-800">
-                        "{member.bio}"
-                      </p>
-
-                      <div className="space-y-1 text-xs text-slate-400">
-                        {member.phone && (
-                          <div className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-slate-500" />
-                            <a href={`tel:${member.phone}`} className="text-red-400 font-semibold hover:underline">
-                              {member.phone}
-                            </a>
-                          </div>
-                        )}
-                        {member.email && (
-                          <div className="flex items-center gap-1.5">
-                            <Mail className="w-3.5 h-3.5 text-slate-500" />
-                            <span>{member.email}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {member.socials.facebook && (
-                          <a
-                            href={member.socials.facebook}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs text-slate-400 hover:text-blue-400 font-semibold"
-                          >
-                            FB
-                          </a>
-                        )}
-                        {member.socials.instagram && (
-                          <a
-                            href={member.socials.instagram}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs text-slate-400 hover:text-pink-400 font-semibold"
-                          >
-                            IG
-                          </a>
-                        )}
-                        {member.socials.twitter && (
-                          <a
-                            href={member.socials.twitter}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs text-slate-400 hover:text-sky-400 font-semibold"
-                          >
-                            TW
-                          </a>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setEditingTeamMember(member);
-                            setNewTeam({
-                              name: member.name,
-                              role: member.role,
-                              bio: member.bio,
-                              image: member.image,
-                              department: member.department || 'Emergency Operations',
-                              phone: member.phone || '',
-                              email: member.email || '',
-                              isCore: member.isCore,
-                              socials: {
-                                facebook: member.socials.facebook || '',
-                                instagram: member.socials.instagram || '',
-                                twitter: member.socials.twitter || '',
-                              },
-                            });
-                            setShowTeamModal(true);
-                          }}
-                          className="h-7 px-2 text-[11px] bg-slate-800 border-slate-700 text-slate-200"
-                        >
-                          <Edit className="w-3.5 h-3.5 mr-1" />
-                          <span>Edit</span>
-                        </Button>
-                        <button
-                          onClick={() => handleDeleteTeam(member.id, member.name)}
-                          className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-md"
-                          title="Remove member"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                }
+                onResetFilters={() => {
+                  setTeamDepartmentFilter('ALL');
+                  setTeamSearch('');
+                }}
+                hasActiveFilters={teamDepartmentFilter !== 'ALL'}
+                emptyTitle="No team members found"
+                emptyDescription="No team members match your current filters."
+                emptyActionText="Add Team Member"
+                onEmptyAction={() => {
+                  setEditingTeamMember(null);
+                  setShowTeamModal(true);
+                }}
+                paginated={true}
+                initialPageSize={10}
+                pageSizeOptions={[5, 10, 20]}
+              />
             </div>
           )}
 
@@ -1972,18 +2324,55 @@ export const DashboardPage: React.FC = () => {
           {/* ========================================================================= */}
           {activeSection === 'donors' && (
             <div className="space-y-6 max-w-7xl mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Droplet className="w-5 h-5 text-red-500 fill-current" />
-                    <span>Voluntary Blood Donor Pool</span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Live verified registry of voluntary whole blood, plasma, and platelet donors across Nepal.
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Droplet className="w-5 h-5 text-red-500 fill-current" />
+                  <span>Voluntary Blood Donor Pool</span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Live verified registry of voluntary whole blood, plasma, and platelet donors across Nepal.
+                </p>
+              </div>
 
-                <div className="flex items-center gap-2">
+              <DataTable<BloodDonor>
+                data={filteredDonors}
+                columns={donorColumns}
+                keyExtractor={(d) => d.id}
+                searchPlaceholder="Search donor name, phone, city..."
+                searchValue={donorSearch}
+                onSearchChange={setDonorSearch}
+                filters={[
+                  {
+                    id: 'bloodGroup',
+                    value: donorGroupFilter,
+                    onChange: setDonorGroupFilter,
+                    options: [
+                      { label: 'All Blood Groups', value: 'ALL' },
+                      ...BLOOD_GROUPS.map((g) => ({ label: g, value: g })),
+                    ],
+                  },
+                  {
+                    id: 'district',
+                    value: donorDistrictFilter,
+                    onChange: setDonorDistrictFilter,
+                    options: [
+                      { label: 'All Districts', value: 'ALL' },
+                      ...DISTRICTS_NEPAL.map((d) => ({ label: d, value: d })),
+                    ],
+                  },
+                ]}
+                customFilters={
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs">
+                    <input
+                      type="checkbox"
+                      checked={donorAvailableOnly}
+                      onChange={(e) => setDonorAvailableOnly(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded text-rose-600 focus:ring-rose-500 cursor-pointer"
+                    />
+                    <span>Available Donors Only</span>
+                  </label>
+                }
+                actions={
                   <Button
                     variant="primary"
                     size="sm"
@@ -1993,121 +2382,26 @@ export const DashboardPage: React.FC = () => {
                     <Plus className="w-4 h-4 mr-1" />
                     <span>Register Voluntary Donor</span>
                   </Button>
-                </div>
-              </div>
-
-              {/* Filters */}
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Search name, phone, city..."
-                    value={donorSearch}
-                    onChange={(e) => setDonorSearch(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white"
-                  />
-                </div>
-
-                <select
-                  value={donorGroupFilter}
-                  onChange={(e) => setDonorGroupFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Blood Groups</option>
-                  {BLOOD_GROUPS.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={donorDistrictFilter}
-                  onChange={(e) => setDonorDistrictFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs bg-slate-950 border border-slate-700/80 rounded-lg text-white font-medium"
-                >
-                  <option value="ALL">All Districts</option>
-                  {DISTRICTS_NEPAL.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={donorAvailableOnly}
-                    onChange={(e) => setDonorAvailableOnly(e.target.checked)}
-                    className="w-4 h-4 rounded text-red-600 focus:ring-red-500"
-                  />
-                  <span>Available Donors Only</span>
-                </label>
-              </div>
-
-              {/* Table */}
-              <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[11px] border-b border-slate-800">
-                      <tr>
-                        <th className="py-3.5 px-4">Donor Name</th>
-                        <th className="py-3.5 px-4">Blood Group</th>
-                        <th className="py-3.5 px-4">Location</th>
-                        <th className="py-3.5 px-4">Phone Contact</th>
-                        <th className="py-3.5 px-4">Donations</th>
-                        <th className="py-3.5 px-4">Availability</th>
-                        <th className="py-3.5 px-4 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800">
-                      {filteredDonors.map((d) => (
-                        <tr key={d.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="py-3.5 px-4">
-                            <div className="font-bold text-white">{d.firstName} {d.lastName}</div>
-                            <div className="text-[11px] text-slate-400">{d.age}y · {d.gender}</div>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className="font-mono font-extrabold text-xs px-2.5 py-1 rounded bg-red-950/60 text-red-300 border border-red-800/60">
-                              {d.bloodGroup}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <div className="font-medium text-slate-200">{d.city}</div>
-                            <div className="text-[11px] text-slate-500">{d.district}</div>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <a href={`tel:${d.mobile}`} className="font-mono font-bold text-red-400 hover:underline">
-                              {d.mobile}
-                            </a>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className="font-mono font-bold text-white">{d.totalDonations || 0}</span> pints
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <button
-                              onClick={() => handleToggleAvailability(d.id, `${d.firstName} ${d.lastName}`)}
-                              className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors cursor-pointer ${
-                                d.isAvailable
-                                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                                  : 'bg-slate-800 border-slate-700 text-slate-500'
-                              }`}
-                            >
-                              {d.isAvailable ? 'Available' : 'Unavailable'}
-                            </button>
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <a
-                              href={`tel:${d.mobile}`}
-                              className="p-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white inline-flex items-center justify-center transition-colors"
-                              title="Call Donor"
-                            >
-                              <Phone className="w-3.5 h-3.5" />
-                            </a>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                }
+                onResetFilters={() => {
+                  setDonorGroupFilter('ALL');
+                  setDonorDistrictFilter('ALL');
+                  setDonorAvailableOnly(false);
+                  setDonorSearch('');
+                }}
+                hasActiveFilters={
+                  donorGroupFilter !== 'ALL' ||
+                  donorDistrictFilter !== 'ALL' ||
+                  donorAvailableOnly
+                }
+                emptyTitle="No donors found"
+                emptyDescription="No voluntary blood donors match your search or filter requirements."
+                emptyActionText="Register Voluntary Donor"
+                onEmptyAction={() => setShowDonorModal(true)}
+                paginated={true}
+                initialPageSize={10}
+                pageSizeOptions={[5, 10, 20, 50]}
+              />
             </div>
           )}
 
@@ -2116,222 +2410,32 @@ export const DashboardPage: React.FC = () => {
           {/* ========================================================================= */}
           {activeSection === 'campaigns' && (
             <div className="space-y-6 max-w-7xl mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-amber-400" />
-                    <span>Community Blood Drives & Mobile Camps</span>
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Track mobile collection drives across Parsa, Bara, Janakpur, and Chitwan.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {campaigns.map((camp) => (
-                  <div
-                    key={camp.id}
-                    className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden flex flex-col justify-between shadow-sm"
-                  >
-                    <div>
-                      <div className="h-40 overflow-hidden relative">
-                        <img
-                          src={camp.bannerImage}
-                          alt={camp.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = '/img/overview.36cb952a.jpg';
-                          }}
-                        />
-                        <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/80 text-white backdrop-blur-xs">
-                          {camp.status}
-                        </span>
-                      </div>
-
-                      <div className="p-5 space-y-2.5">
-                        <div className="text-[11px] font-bold text-red-400 flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>{camp.date}</span>
-                        </div>
-                        <h4 className="text-base font-bold text-white leading-snug">{camp.title}</h4>
-                        <div className="text-xs text-slate-400 flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                          <span>{camp.venue}, {camp.district}</span>
-                        </div>
-                        <p className="text-xs text-slate-300 line-clamp-2">{camp.description}</p>
-                      </div>
-                    </div>
-
-                    <div className="p-5 pt-0 border-t border-slate-800 flex items-center justify-between mt-2">
-                      <div className="text-xs font-bold text-white">
-                        Units: <span className="text-red-400 font-mono">{camp.unitsCollected || camp.attendance}</span>
-                      </div>
-                      <Link to={`/campaign/${camp.slug}`}>
-                        <Button variant="outline" size="sm" className="text-xs h-7 px-2.5 bg-slate-800 border-slate-700 text-slate-200">
-                          View Camp
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* VIEW 8: REGIONAL BLOOD CENTERS */}
-          {/* ========================================================================= */}
-          {activeSection === 'blood-banks' && (
-            <div className="space-y-6 max-w-7xl mx-auto">
               <div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-slate-300" />
-                  <span>Regional Blood Transfusion Centers & Hospital Liaison</span>
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-amber-500" />
+                  <span>Community Blood Drives & Mobile Camps</span>
                 </h2>
-                <p className="text-xs text-slate-400">
-                  Direct emergency hotlines and operational hours for certified blood centers in Madhesh, Bagmati, and Gandaki provinces.
+                <p className="text-xs text-slate-500">
+                  Track mobile collection drives across Parsa, Bara, Janakpur, and Chitwan.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 border-l-4 border-l-red-500">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">Primary Partner · Parsa</span>
-                    <h3 className="text-lg font-bold text-white">Narayani Hospital Blood Bank</h3>
-                    <div className="text-xs text-slate-400 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Hospital Road, Birgunj</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Zonal referral blood bank maintaining continuous whole blood testing, component preparation, and cross-matching for Parsa & Bara districts.
-                  </p>
-                  <div className="pt-2 border-t border-slate-800 space-y-1.5">
-                    <div className="text-xs font-bold text-slate-400">Direct Hotline:</div>
-                    <a href="tel:051521993" className="text-sm font-mono font-bold text-red-400 hover:underline block">
-                      051-521993 / 051-522108
-                    </a>
-                    <div className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>Open 24 Hours / 7 Days</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 border-l-4 border-l-rose-500">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400">Nepal Red Cross · Parsa</span>
-                    <h3 className="text-lg font-bold text-white">Nepal Red Cross Society Blood Center</h3>
-                    <div className="text-xs text-slate-400 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Ghantaghar Chowk, Birgunj</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Community collection center and mobile blood donation logistics partner in Parsa coordinating replacement donors and camps.
-                  </p>
-                  <div className="pt-2 border-t border-slate-800 space-y-1.5">
-                    <div className="text-xs font-bold text-slate-400">Direct Hotline:</div>
-                    <a href="tel:051522137" className="text-sm font-mono font-bold text-red-400 hover:underline block">
-                      051-522137
-                    </a>
-                    <div className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>Open 24 Hours / 7 Days</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 border-l-4 border-l-amber-500">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Central Transfusion Service</span>
-                    <h3 className="text-lg font-bold text-white">Central Blood Transfusion Service</h3>
-                    <div className="text-xs text-slate-400 flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                      <span>Exhibition Road, Kathmandu</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    National apex blood center coordinating rare blood group exchange, nationwide stock audits, and inter-district transport.
-                  </p>
-                  <div className="pt-2 border-t border-slate-800 space-y-1.5">
-                    <div className="text-xs font-bold text-slate-400">Direct Hotline:</div>
-                    <a href="tel:014288485" className="text-sm font-mono font-bold text-red-400 hover:underline block">
-                      01-4288485 / 01-4288486
-                    </a>
-                    <div className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>Open 24 Hours / 7 Days</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <DataTable<Campaign>
+                data={campaigns}
+                columns={campaignColumns}
+                keyExtractor={(camp) => camp.id}
+                searchPlaceholder="Search camp title, organizer, district..."
+                emptyTitle="No camps found"
+                emptyDescription="No donation drives currently match your query."
+                paginated={true}
+                initialPageSize={10}
+                pageSizeOptions={[5, 10, 20]}
+              />
             </div>
           )}
 
-          {/* ========================================================================= */}
-          {/* VIEW 9: SYSTEM SETTINGS & EXPORTS */}
-          {/* ========================================================================= */}
-          {activeSection === 'settings' && (
-            <div className="space-y-6 max-w-4xl mx-auto">
-              <div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-slate-300" />
-                  <span>Operations System & Data Management</span>
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Manage operational parameters, export records for hospital reports, and inspect local database persistence.
-                </p>
-              </div>
 
-              <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-5">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                  <span>Export Operations Data</span>
-                </h3>
-                <p className="text-xs text-slate-300">
-                  Download timestamped CSV spreadsheets for emergency triage audits, donor counts, and citizen inquiry response logs.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={exportTicketsCSV}
-                    className="text-xs bg-slate-800 border-slate-700 text-slate-200"
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5 mr-1 text-emerald-400" />
-                    <span>Download Emergency Tickets CSV</span>
-                  </Button>
-                </div>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Database className="w-4 h-4 text-sky-400" />
-                  <span>Local Storage Persistence Status</span>
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                    <div className="font-mono text-base font-bold text-white">{tickets.length}</div>
-                    <div className="text-[11px] text-slate-400">Emergency Tickets</div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                    <div className="font-mono text-base font-bold text-white">{inquiries.length}</div>
-                    <div className="text-[11px] text-slate-400">Citizen Inquiries</div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                    <div className="font-mono text-base font-bold text-white">{volunteers.length}</div>
-                    <div className="text-[11px] text-slate-400">Active Volunteers</div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                    <div className="font-mono text-base font-bold text-white">{team.length}</div>
-                    <div className="text-[11px] text-slate-400">Team Members</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
         </main>
       </div>
 
@@ -2339,21 +2443,21 @@ export const DashboardPage: React.FC = () => {
       {/* MODAL 1: NEW EMERGENCY TICKET MODAL */}
       {/* ========================================================================= */}
       {showTicketModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 sm:p-8 space-y-5 shadow-2xl relative my-8 text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-xl w-full p-6 sm:p-8 space-y-5 shadow-2xl relative my-8 text-slate-900">
             <button
               onClick={() => setShowTicketModal(false)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <div className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="text-xs font-bold text-rose-600 uppercase tracking-wider flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4" />
                 <span>24/7 Operations Desk</span>
               </div>
-              <h3 className="text-xl font-bold text-white mt-1">Dispatch Emergency Request</h3>
+              <h3 className="text-xl font-bold text-slate-900 mt-1">Dispatch Emergency Request</h3>
               <p className="text-xs text-slate-400">
                 Log critical medical requests for immediate volunteer mobilization.
               </p>
@@ -2362,13 +2466,13 @@ export const DashboardPage: React.FC = () => {
             <form onSubmit={handleCreateTicketSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Service Type *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Service Type *</label>
                   <select
                     value={newTicket.sewaType}
                     onChange={(e) =>
                       setNewTicket({ ...newTicket, sewaType: e.target.value as EmergencyServiceType })
                     }
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-bold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     <option value="Blood">Blood Transfusion</option>
                     <option value="Oxygen">Oxygen Cylinder</option>
@@ -2379,7 +2483,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Urgency Priority *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Urgency Priority *</label>
                   <select
                     value={newTicket.urgency}
                     onChange={(e) =>
@@ -2388,7 +2492,7 @@ export const DashboardPage: React.FC = () => {
                         urgency: e.target.value as 'Immediate (Within 2 hrs)' | 'Today (Within 6 hrs)' | 'Scheduled',
                       })
                     }
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-bold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     <option value="Immediate (Within 2 hrs)">Immediate (Within 2 hrs)</option>
                     <option value="Today (Within 6 hrs)">Today (Within 6 hrs)</option>
@@ -2398,15 +2502,15 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               {newTicket.sewaType === 'Blood' && (
-                <div className="grid grid-cols-2 gap-3 p-3 bg-red-950/40 rounded-xl border border-red-800/60">
+                <div className="grid grid-cols-2 gap-3 p-3 bg-rose-50/80 rounded-xl border border-rose-200/80">
                   <div>
-                    <label className="block text-xs font-semibold text-red-300 mb-1">Blood Group *</label>
+                    <label className="block text-xs font-semibold text-rose-950 mb-1">Blood Group *</label>
                     <select
                       value={newTicket.bloodGroup}
                       onChange={(e) =>
                         setNewTicket({ ...newTicket, bloodGroup: e.target.value as BloodGroup })
                       }
-                      className="w-full px-3 py-2 text-xs bg-slate-950 border border-red-700 rounded-lg font-bold text-white"
+                      className="w-full px-3 py-2 text-xs bg-white border border-rose-300 rounded-lg font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                     >
                       {BLOOD_GROUPS.map((g) => (
                         <option key={g} value={g}>{g}</option>
@@ -2414,14 +2518,14 @@ export const DashboardPage: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-red-300 mb-1">Units / Pints *</label>
+                    <label className="block text-xs font-semibold text-rose-950 mb-1">Units / Pints *</label>
                     <input
                       type="number"
                       min={1}
                       max={10}
                       value={newTicket.unitsNeeded}
                       onChange={(e) => setNewTicket({ ...newTicket, unitsNeeded: Number(e.target.value) })}
-                      className="w-full px-3 py-2 text-xs bg-slate-950 border border-red-700 rounded-lg font-bold text-white"
+                      className="w-full px-3 py-2 text-xs bg-white border border-rose-300 rounded-lg font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                     />
                   </div>
                 </div>
@@ -2429,66 +2533,66 @@ export const DashboardPage: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Patient Name *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Patient Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Maya Shrestha"
                     value={newTicket.patientName}
                     onChange={(e) => setNewTicket({ ...newTicket, patientName: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Age *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Age *</label>
                   <input
                     type="number"
                     required
                     value={newTicket.patientAge}
                     onChange={(e) => setNewTicket({ ...newTicket, patientAge: Number(e.target.value) })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Hospital / Clinic *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Hospital / Clinic *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Narayani Hospital, ICU Ward 3"
                     value={newTicket.hospitalName}
                     onChange={(e) => setNewTicket({ ...newTicket, hospitalName: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Contact Phone (10 digits) *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Contact Phone (10 digits) *</label>
                   <input
                     type="tel"
                     required
                     placeholder="e.g. 9845012345"
                     value={newTicket.contactMobile}
                     onChange={(e) => setNewTicket({ ...newTicket, contactMobile: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-mono font-bold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-mono font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Clinical Notes (Optional)</label>
+                <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Clinical Notes (Optional)</label>
                 <textarea
                   rows={2}
                   placeholder="Doctor's name, surgery schedule, specific requirements..."
                   value={newTicket.message}
                   onChange={(e) => setNewTicket({ ...newTicket, message: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" type="button" onClick={() => setShowTicketModal(false)} className="bg-slate-800 border-slate-700 text-slate-200">
+                <Button variant="outline" size="sm" type="button" onClick={() => setShowTicketModal(false)} className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
                   Cancel
                 </Button>
                 <Button variant="destructive" size="sm" type="submit" isLoading={isCreatingTicket}>
@@ -2504,50 +2608,50 @@ export const DashboardPage: React.FC = () => {
       {/* MODAL 2: TICKET DETAILS MODAL */}
       {/* ========================================================================= */}
       {selectedTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative text-slate-900">
             <button
               onClick={() => setSelectedTicket(null)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-white">{selectedTicket.ticketNumber}</span>
+                <span className="font-mono text-sm font-bold text-slate-900">{selectedTicket.ticketNumber}</span>
                 <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-red-600/30 text-red-300 border border-red-500/40">
                   {selectedTicket.sewaType}
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-white mt-1">{selectedTicket.patientName}</h3>
+              <h3 className="text-xl font-bold text-slate-900 mt-1">{selectedTicket.patientName}</h3>
               <div className="text-xs text-slate-400">
                 {selectedTicket.patientAge} years · {selectedTicket.gender} · Admitted at {selectedTicket.hospitalName}
               </div>
             </div>
 
-            <div className="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs">
-              <div className="flex justify-between py-1 border-b border-slate-800">
+            <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+              <div className="flex justify-between py-1 border-b border-slate-200/80">
                 <span className="text-slate-400">Hospital Address:</span>
                 <span className="font-semibold text-white">{selectedTicket.hospitalAddress}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-800">
+              <div className="flex justify-between py-1 border-b border-slate-200/80">
                 <span className="text-slate-400">Emergency Contact:</span>
                 <span className="font-semibold text-white">
                   {selectedTicket.contactName} ({selectedTicket.contactMobile})
                 </span>
               </div>
               {selectedTicket.bloodGroup && (
-                <div className="flex justify-between py-1 border-b border-slate-800">
+                <div className="flex justify-between py-1 border-b border-slate-200/80">
                   <span className="text-slate-400">Blood Requisition:</span>
-                  <span className="font-bold text-red-400 font-mono">
+                  <span className="font-bold text-rose-600 font-mono">
                     {selectedTicket.unitsNeeded || 1} Pint(s) of {selectedTicket.bloodGroup}
                   </span>
                 </div>
               )}
-              <div className="flex justify-between py-1 border-b border-slate-800">
+              <div className="flex justify-between py-1 border-b border-slate-200/80">
                 <span className="text-slate-400">Urgency Level:</span>
-                <span className="font-bold text-rose-400">{selectedTicket.urgency}</span>
+                <span className="font-bold text-rose-600">{selectedTicket.urgency}</span>
               </div>
               {selectedTicket.message && (
                 <div className="pt-1">
@@ -2560,7 +2664,7 @@ export const DashboardPage: React.FC = () => {
             <div className="flex items-center justify-between pt-2">
               <a
                 href={`tel:${selectedTicket.contactMobile}`}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white font-bold text-xs flex items-center gap-1.5 hover:bg-red-700 transition-colors shadow-2xs"
+                className="px-4 py-2 rounded-lg bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5 hover:bg-red-700 transition-colors shadow-2xs"
               >
                 <PhoneCall className="w-3.5 h-3.5" />
                 <span>Call {selectedTicket.contactMobile}</span>
@@ -2570,7 +2674,7 @@ export const DashboardPage: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedTicket(null)}
-                className="bg-slate-800 border-slate-700 text-slate-200"
+                className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
               >
                 Close
               </Button>
@@ -2583,56 +2687,56 @@ export const DashboardPage: React.FC = () => {
       {/* MODAL 3: LOG INQUIRY MODAL */}
       {/* ========================================================================= */}
       {showInquiryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-4 shadow-2xl relative text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 sm:p-8 space-y-4 shadow-2xl relative text-slate-900">
             <button
               onClick={() => setShowInquiryModal(false)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <div className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1">
+              <div className="text-xs font-bold text-sky-700 uppercase tracking-wider flex items-center gap-1">
                 <MessageSquare className="w-4 h-4" />
                 <span>Citizen Communications</span>
               </div>
-              <h3 className="text-lg font-bold text-white mt-1">Log New Inquiry</h3>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">Log New Inquiry</h3>
             </div>
 
             <form onSubmit={handleInquirySubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Citizen / Hospital Rep Name *</label>
+                <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Citizen / Hospital Rep Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Dr. Rabin Shrestha"
                   value={newInquiry.name}
                   onChange={(e) => setNewInquiry({ ...newInquiry, name: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Mobile Phone *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Mobile Phone *</label>
                   <input
                     type="tel"
                     required
                     placeholder="e.g. 9845012345"
                     value={newInquiry.mobile}
                     onChange={(e) => setNewInquiry({ ...newInquiry, mobile: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-mono font-bold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-mono font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Category *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Category *</label>
                   <select
                     value={newInquiry.category}
                     onChange={(e) =>
                       setNewInquiry({ ...newInquiry, category: e.target.value as InquiryCategory })
                     }
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-semibold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     <option value="Hospital Partnership">Hospital Partnership</option>
                     <option value="Camp Organization">Camp Organization</option>
@@ -2644,19 +2748,19 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Inquiry Notes *</label>
+                <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Inquiry Notes *</label>
                 <textarea
                   rows={3}
                   required
                   placeholder="Summary of request, question, or phone discussion..."
                   value={newInquiry.message}
                   onChange={(e) => setNewInquiry({ ...newInquiry, message: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" type="button" onClick={() => setShowInquiryModal(false)} className="bg-slate-800 border-slate-700 text-slate-200">
+                <Button variant="outline" size="sm" type="button" onClick={() => setShowInquiryModal(false)} className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
                   Cancel
                 </Button>
                 <Button variant="primary" size="sm" type="submit" isLoading={isSubmittingInquiry}>
@@ -2672,40 +2776,40 @@ export const DashboardPage: React.FC = () => {
       {/* MODAL 4: INQUIRY DETAILS / RESPOND MODAL */}
       {/* ========================================================================= */}
       {selectedInquiry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative text-slate-900">
             <button
               onClick={() => setSelectedInquiry(null)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <div className="text-xs font-bold text-sky-400 uppercase tracking-wider">{selectedInquiry.ticketId}</div>
-              <h3 className="text-lg font-bold text-white mt-1">{selectedInquiry.name}</h3>
+              <div className="text-xs font-bold text-sky-700 uppercase tracking-wider">{selectedInquiry.ticketId}</div>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">{selectedInquiry.name}</h3>
               <div className="text-xs text-slate-400">Phone: {selectedInquiry.mobile} · {selectedInquiry.category}</div>
             </div>
 
-            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600">
               "{selectedInquiry.message}"
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-300">Add Coordinator Response Note</label>
+              <label className="block text-xs font-semibold text-slate-600">Add Coordinator Response Note</label>
               <textarea
                 rows={2}
                 placeholder="Called citizen, coordinated with blood bank..."
                 defaultValue={selectedInquiry.responseNotes || ''}
                 id="responseNoteInput"
-                className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
               />
             </div>
 
             <div className="flex items-center justify-between pt-2">
               <a
                 href={`tel:${selectedInquiry.mobile}`}
-                className="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-xs flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5"
               >
                 <PhoneCall className="w-3.5 h-3.5" />
                 <span>Call Citizen</span>
@@ -2733,56 +2837,56 @@ export const DashboardPage: React.FC = () => {
       {/* MODAL 5: REGISTER VOLUNTEER MODAL */}
       {/* ========================================================================= */}
       {showVolunteerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-4 shadow-2xl relative text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-4 shadow-2xl relative text-slate-900">
             <button
               onClick={() => setShowVolunteerModal(false)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+              <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
                 <UserCheck className="w-4 h-4" />
                 <span>Community Force</span>
               </div>
-              <h3 className="text-xl font-bold text-white mt-1">Register New Volunteer</h3>
+              <h3 className="text-xl font-bold text-slate-900 mt-1">Register New Volunteer</h3>
             </div>
 
             <form onSubmit={handleVolunteerSubmit} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Full Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Ramesh Giri"
                     value={newVolunteer.name}
                     onChange={(e) => setNewVolunteer({ ...newVolunteer, name: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Volunteer Role *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Volunteer Role *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Field Responder"
                     value={newVolunteer.role}
                     onChange={(e) => setNewVolunteer({ ...newVolunteer, role: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">District *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">District *</label>
                   <select
                     value={newVolunteer.district}
                     onChange={(e) => setNewVolunteer({ ...newVolunteer, district: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     {DISTRICTS_NEPAL.map((d) => (
                       <option key={d} value={d}>{d}</option>
@@ -2790,21 +2894,21 @@ export const DashboardPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">City *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">City *</label>
                   <input
                     type="text"
                     required
                     value={newVolunteer.city}
                     onChange={(e) => setNewVolunteer({ ...newVolunteer, city: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Blood Group *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Blood Group *</label>
                   <select
                     value={newVolunteer.bloodGroup}
                     onChange={(e) => setNewVolunteer({ ...newVolunteer, bloodGroup: e.target.value as BloodGroup })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-bold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     {BLOOD_GROUPS.map((g) => (
                       <option key={g} value={g}>{g}</option>
@@ -2815,21 +2919,21 @@ export const DashboardPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Mobile (10 digits) *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Mobile (10 digits) *</label>
                   <input
                     type="tel"
                     required
                     value={newVolunteer.mobile}
                     onChange={(e) => setNewVolunteer({ ...newVolunteer, mobile: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-mono font-bold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-mono font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Recognition Badge</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Recognition Badge</label>
                   <select
                     value={newVolunteer.badge}
                     onChange={(e) => setNewVolunteer({ ...newVolunteer, badge: e.target.value as VolunteerBadge })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-semibold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     <option value="Youth Lead">Youth Lead</option>
                     <option value="Gold Responder">Gold Responder</option>
@@ -2840,18 +2944,18 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Key Skills (comma separated)</label>
+                <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Key Skills (comma separated)</label>
                 <input
                   type="text"
                   placeholder="Cold Chain Transport, Hospital Liaison, First Aid..."
                   value={newVolunteer.skills}
                   onChange={(e) => setNewVolunteer({ ...newVolunteer, skills: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                 />
               </div>
 
               <div className="pt-1">
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-200 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={newVolunteer.emergencyStandby}
@@ -2863,7 +2967,7 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" type="button" onClick={() => setShowVolunteerModal(false)} className="bg-slate-800 border-slate-700 text-slate-200">
+                <Button variant="outline" size="sm" type="button" onClick={() => setShowVolunteerModal(false)} className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
                   Cancel
                 </Button>
                 <Button variant="primary" size="sm" type="submit" isLoading={isAddingVolunteer}>
@@ -2879,24 +2983,24 @@ export const DashboardPage: React.FC = () => {
       {/* MODAL 6: ADD / EDIT TEAM MEMBER MODAL */}
       {/* ========================================================================= */}
       {showTeamModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-4 shadow-2xl relative text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-4 shadow-2xl relative text-slate-900">
             <button
               onClick={() => {
                 setShowTeamModal(false);
                 setEditingTeamMember(null);
               }}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1">
+              <div className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1">
                 <Briefcase className="w-4 h-4" />
                 <span>Executive Registry</span>
               </div>
-              <h3 className="text-xl font-bold text-white mt-1">
+              <h3 className="text-xl font-bold text-slate-900 mt-1">
                 {editingTeamMember ? 'Edit Team Member' : 'Add New Team Member'}
               </h3>
             </div>
@@ -2904,38 +3008,38 @@ export const DashboardPage: React.FC = () => {
             <form onSubmit={handleTeamSubmit} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Full Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Ayub Alam"
                     value={newTeam.name}
                     onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Official Role *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Official Role *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Operations Lead"
                     value={newTeam.role}
                     onChange={(e) => setNewTeam({ ...newTeam, role: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Department *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Department *</label>
                   <select
                     value={newTeam.department}
                     onChange={(e) =>
                       setNewTeam({ ...newTeam, department: e.target.value as TeamMember['department'] })
                     }
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-semibold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-semibold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     <option value="Leadership">Leadership</option>
                     <option value="Emergency Operations">Emergency Operations</option>
@@ -2946,30 +3050,30 @@ export const DashboardPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Phone Number</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Phone Number</label>
                   <input
                     type="tel"
                     placeholder="e.g. 9845012345"
                     value={newTeam.phone}
                     onChange={(e) => setNewTeam({ ...newTeam, phone: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Bio / Mission Statement</label>
+                <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Bio / Mission Statement</label>
                 <textarea
                   rows={2}
                   placeholder="Helping others without expecting anything in return..."
                   value={newTeam.bio}
                   onChange={(e) => setNewTeam({ ...newTeam, bio: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                 />
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-200 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={newTeam.isCore}
@@ -2989,7 +3093,7 @@ export const DashboardPage: React.FC = () => {
                     setShowTeamModal(false);
                     setEditingTeamMember(null);
                   }}
-                  className="bg-slate-800 border-slate-700 text-slate-200"
+                  className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
                 >
                   Cancel
                 </Button>
@@ -3006,54 +3110,54 @@ export const DashboardPage: React.FC = () => {
       {/* MODAL 7: REGISTER DONOR MODAL */}
       {/* ========================================================================= */}
       {showDonorModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-4 shadow-2xl relative text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-4 shadow-2xl relative text-slate-900">
             <button
               onClick={() => setShowDonorModal(false)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div>
-              <div className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center gap-1">
+              <div className="text-xs font-bold text-rose-600 uppercase tracking-wider flex items-center gap-1">
                 <Droplet className="w-4 h-4 fill-current" />
                 <span>Voluntary Blood Network</span>
               </div>
-              <h3 className="text-xl font-bold text-white mt-1">Register Voluntary Blood Donor</h3>
+              <h3 className="text-xl font-bold text-slate-900 mt-1">Register Voluntary Blood Donor</h3>
             </div>
 
             <form onSubmit={handleDonorSubmit} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">First Name *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">First Name *</label>
                   <input
                     type="text"
                     required
                     value={newDonor.firstName}
                     onChange={(e) => setNewDonor({ ...newDonor, firstName: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Last Name *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Last Name *</label>
                   <input
                     type="text"
                     required
                     value={newDonor.lastName}
                     onChange={(e) => setNewDonor({ ...newDonor, lastName: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Blood Group *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Blood Group *</label>
                   <select
                     value={newDonor.bloodGroup}
                     onChange={(e) => setNewDonor({ ...newDonor, bloodGroup: e.target.value as BloodGroup })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-bold text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     {BLOOD_GROUPS.map((g) => (
                       <option key={g} value={g}>{g}</option>
@@ -3061,11 +3165,11 @@ export const DashboardPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Gender *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Gender *</label>
                   <select
                     value={newDonor.gender}
                     onChange={(e) => setNewDonor({ ...newDonor, gender: e.target.value as Gender })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -3073,25 +3177,25 @@ export const DashboardPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Age *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Age *</label>
                   <input
                     type="number"
                     min={18}
                     max={65}
                     value={newDonor.age}
                     onChange={(e) => setNewDonor({ ...newDonor, age: Number(e.target.value) })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">District *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">District *</label>
                   <select
                     value={newDonor.district}
                     onChange={(e) => setNewDonor({ ...newDonor, district: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   >
                     {DISTRICTS_NEPAL.map((d) => (
                       <option key={d} value={d}>{d}</option>
@@ -3099,31 +3203,31 @@ export const DashboardPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">City / Municipality *</label>
+                  <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">City / Municipality *</label>
                   <input
                     type="text"
                     required
                     value={newDonor.city}
                     onChange={(e) => setNewDonor({ ...newDonor, city: e.target.value })}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Mobile Phone (10 digits) *</label>
+                <label className="block text-xs font-semibold text-slate-700 font-semibold mb-1">Mobile Phone (10 digits) *</label>
                 <input
                   type="tel"
                   required
                   placeholder="e.g. 9845012345"
                   value={newDonor.mobile}
                   onChange={(e) => setNewDonor({ ...newDonor, mobile: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-700 rounded-lg font-mono font-bold text-white"
+                  className="w-full px-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-lg font-mono font-bold text-slate-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600"
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" type="button" onClick={() => setShowDonorModal(false)} className="bg-slate-800 border-slate-700 text-slate-200">
+                <Button variant="outline" size="sm" type="button" onClick={() => setShowDonorModal(false)} className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
                   Cancel
                 </Button>
                 <Button variant="primary" size="sm" type="submit" isLoading={isAddingDonor}>

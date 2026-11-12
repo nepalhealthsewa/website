@@ -21,7 +21,7 @@ export const CampaignsPage: React.FC = () => {
           <span className="text-xs font-semibold uppercase tracking-wider text-red-600 block mb-1">
             Community Mobilization
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
             Blood Donation Drives & Campaigns
           </h1>
           <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl leading-relaxed">
@@ -29,8 +29,8 @@ export const CampaignsPage: React.FC = () => {
           </p>
         </div>
 
-        <Link to="/contact">
-          <Button variant="outline" size="md">
+        <Link to="/contact" className="w-full sm:w-auto">
+          <Button variant="outline" size="md" className="w-full sm:w-auto">
             <span>Organize a Drive With Us</span>
           </Button>
         </Link>
@@ -122,59 +122,59 @@ export const CampaignsPage: React.FC = () => {
       )}
 
       {/* How to Organize a Blood Drive Guide */}
-      <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-10 space-y-8">
+      <div className="bg-white text-slate-900 rounded-2xl p-6 sm:p-10 space-y-8 border border-slate-200/80 shadow-xs">
         <div className="max-w-2xl">
-          <span className="text-xs font-semibold uppercase tracking-wider text-red-400 block mb-1">
+          <span className="text-xs font-semibold uppercase tracking-wider text-rose-600 block mb-1 font-mono">
             Community Leadership
           </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold">
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900">
             Want to Host a Blood Donation Camp?
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
             Whether you represent a college campus, youth club, corporate office, or religious community in Nepal, we partner with you end-to-end at zero cost.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="p-5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-            <div className="text-xs font-mono font-bold text-red-400">Step 01</div>
-            <h3 className="text-sm font-bold text-white">Date & Venue Booking</h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div className="text-xs font-mono font-bold text-rose-600">Step 01</div>
+            <h3 className="text-sm font-bold text-slate-900">Date & Venue Booking</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
               Identify a covered, well-ventilated hall or school compound accessible to the public with power supply.
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-            <div className="text-xs font-mono font-bold text-red-400">Step 02</div>
-            <h3 className="text-sm font-bold text-white">Red Cross Mobilization</h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div className="text-xs font-mono font-bold text-rose-600">Step 02</div>
+            <h3 className="text-sm font-bold text-slate-900">Red Cross Mobilization</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
               Nepal Health Sewa coordinates the official Nepal Red Cross blood bus, phlebotomists, sterile kits, and doctor supervision.
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-            <div className="text-xs font-mono font-bold text-red-400">Step 03</div>
-            <h3 className="text-sm font-bold text-white">Community Outreach</h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div className="text-xs font-mono font-bold text-rose-600">Step 03</div>
+            <h3 className="text-sm font-bold text-slate-900">Community Outreach</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
               We design digital flyers, manage local awareness banners, and register participants in advance via our website.
             </p>
           </div>
 
-          <div className="p-5 rounded-xl bg-slate-800/80 border border-slate-700 space-y-2">
-            <div className="text-xs font-mono font-bold text-red-400">Step 04</div>
-            <h3 className="text-sm font-bold text-white">Collection & Certificates</h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div className="text-xs font-mono font-bold text-rose-600">Step 04</div>
+            <h3 className="text-sm font-bold text-slate-900">Collection & Certificates</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
               Every voluntary donor receives clinical health screening, nutritious juice refreshers, and a certified donor card.
             </p>
           </div>
         </div>
 
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800">
-          <span className="text-xs text-slate-400">
-            Reach our event coordinator desk directly: <strong>+977 9845012345</strong>
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
+          <span className="text-xs text-slate-500">
+            Reach our event coordinator desk directly: <strong className="text-slate-800 font-mono">+977 9845012345</strong>
           </span>
           <Link to="/contact">
-            <Button variant="primary" size="md">
+            <Button variant="primary" size="md" className="min-h-[42px]">
               <span>Submit Camp Collaboration Request</span>
             </Button>
           </Link>

@@ -20,7 +20,7 @@ export const CovidGuidelinesPage: React.FC = () => {
         <span className="text-xs font-semibold uppercase tracking-wider text-red-600 block mb-1">
           Public Health Advisory
         </span>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
           {COVID_GUIDELINES.title}
         </h1>
         <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl leading-relaxed">

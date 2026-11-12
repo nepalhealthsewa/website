@@ -421,7 +421,7 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/covid-guidlines" className="text-slate-400 hover:text-white transition-colors">
+                <Link to="/covid-guidelines" className="text-slate-400 hover:text-white transition-colors">
                   COVID-19 Health Directives
                 </Link>
               </li>

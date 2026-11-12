@@ -83,7 +83,7 @@ export const HealthToolsIndexPage: React.FC = () => {
           <Activity className="w-4 h-4" />
           <span>Evidence-Based Health Calculators</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
           Nepal Health Sewa Utility Suite
         </h1>
         <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl">

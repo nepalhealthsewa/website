@@ -130,7 +130,7 @@ export const ContactPage: React.FC = () => {
             <span className="text-xs font-semibold uppercase tracking-wider text-red-600 block mb-1">
               Contacts & Emergency Hub
             </span>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
               Medical Directory & Official Contacts
             </h1>
             <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl leading-relaxed">
@@ -138,17 +138,17 @@ export const ContactPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
             <a
               href="#medical-directory"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 active:scale-[0.98] rounded-xl shadow-xs transition-all min-h-[42px]"
             >
               <PhoneCall className="w-3.5 h-3.5" />
               <span>Medical Services Directory</span>
             </a>
             <a
               href="#enquiry-form"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] border border-slate-200 rounded-xl transition-all min-h-[42px]"
             >
               <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
               <span>Send Message</span>

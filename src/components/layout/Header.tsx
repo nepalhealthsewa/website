@@ -37,7 +37,7 @@ export const Header: React.FC = () => {
   ];
 
   const secondaryNavLinks = [
-    { label: 'COVID-19 Guidelines', path: '/covid-guidlines' },
+    { label: 'COVID-19 Guidelines', path: '/covid-guidelines' },
     { label: 'Diseases Guide', path: '/diseases' },
     { label: 'About Us', path: '/about' },
     { label: 'Our Team', path: '/team' },
@@ -53,27 +53,26 @@ export const Header: React.FC = () => {
   const isSecondaryActive = secondaryNavLinks.some((l) => isActive(l.path));
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
+    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4 lg:gap-6">
         {/* Zone 1: Authentic Brand Logo from reference */}
         <Link
           to="/"
-          className="flex items-center gap-3 text-slate-900 group whitespace-nowrap shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-500 rounded-md"
+          className="flex items-center gap-2.5 sm:gap-3 text-slate-900 group whitespace-nowrap shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-red-500 rounded-md"
         >
           <img
             src="/img/logo.af0d533f.png"
             alt="Nepal Health Sewa Logo"
-            className="w-12 h-12 object-contain group-hover:scale-105 transition-transform"
+            className="w-10 h-10 sm:w-12 sm:h-12 object-contain group-hover:scale-105 transition-transform"
             onError={(e) => {
-              // fallback to logo.339ea3d3.jpg if needed
               (e.currentTarget as HTMLImageElement).src = '/img/logo.339ea3d3.jpg';
             }}
           />
           <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-slate-900 leading-tight">
+            <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 leading-tight font-display">
               Nepal Health Sewa
             </span>
-            <span className="text-[11px] font-semibold text-red-600 tracking-normal hidden sm:block">
+            <span className="text-[10px] sm:text-[11px] font-semibold text-red-600 tracking-normal hidden xs:block sm:block">
               Donate Blood, Save Life
             </span>
           </div>
@@ -154,7 +153,7 @@ export const Header: React.FC = () => {
           <button
             type="button"
             onClick={() => dispatch(toggleMobileMenu())}
-            className="lg:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+            className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer"
             aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

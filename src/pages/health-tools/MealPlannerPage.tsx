@@ -292,7 +292,7 @@ export const MealPlannerPage: React.FC = () => {
                   onClick={() => setDietType(diet.id as DietType)}
                   className={`flex-1 py-1.5 px-3 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                     dietType === diet.id
-                      ? 'bg-slate-900 text-white border-slate-900'
+                      ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
                       : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                   }`}
                 >

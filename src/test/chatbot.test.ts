@@ -37,7 +37,7 @@ describe('Health Chatbot Knowledge Base & Matcher', () => {
   it('matches COVID-19 guidance', () => {
     const res = queryKnowledgeBase('what are symptoms and masks for covid-19?');
     expect(res.id).toBe('covid-guidelines');
-    expect(res.actionLinks?.some((l) => l.path === '/covid-guidlines')).toBe(true);
+    expect(res.actionLinks?.some((l) => l.path === '/covid-guidelines')).toBe(true);
   });
 
   it('provides safe fallback suggestions for unknown phrases', () => {

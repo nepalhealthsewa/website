@@ -296,7 +296,7 @@ export const HEALTHCARE_SERVICES: HealthcareService[] = [
     badge: 'Clinical Protocol',
     availability: 'Always Accessible',
     actionText: 'View COVID-19 Protocols',
-    actionLink: '/covid-guidlines'
+    actionLink: '/covid-guidelines'
   },
   {
     id: 'srv-5',

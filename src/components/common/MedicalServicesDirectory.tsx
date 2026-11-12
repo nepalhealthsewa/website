@@ -348,13 +348,13 @@ export const MedicalServicesDirectory: React.FC = () => {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3.5 py-1.5 rounded-xl font-semibold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                   isSelected
-                    ? 'bg-slate-900 text-white shadow-xs'
+                    ? 'bg-rose-600 text-white shadow-xs'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900'
                 }`}
               >
                 <span>{cat === 'All' ? 'All Services' : cat}</span>
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                  className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono tabular-nums ${
                     isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}
                 >
@@ -444,9 +444,8 @@ export const MedicalServicesDirectory: React.FC = () => {
                         {contact.city}
                       </span>
                       {contact.is24x7 && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          <span>24/7</span>
+                        <span className="text-[11px] font-bold text-emerald-700">
+                          24/7 Service
                         </span>
                       )}
                     </div>

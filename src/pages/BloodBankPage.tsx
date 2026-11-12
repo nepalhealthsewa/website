@@ -181,7 +181,7 @@ export const BloodBankPage: React.FC = () => {
             <Droplet className="w-4 h-4 fill-current" />
             <span>Voluntary Blood Transfusion Network</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
             Blood Bank & Donor Directory
           </h1>
           <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl">
@@ -190,13 +190,13 @@ export const BloodBankPage: React.FC = () => {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 self-start md:self-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 w-full sm:w-auto">
           <button
             onClick={() => {
               setActiveTab('directory');
               setSearchParams({});
             }}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex-1 sm:flex-initial px-4 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap min-h-[42px] flex items-center justify-center ${
               activeTab === 'directory'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -209,7 +209,7 @@ export const BloodBankPage: React.FC = () => {
               setActiveTab('register');
               setSearchParams({ tab: 'register' });
             }}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+            className={`flex-1 sm:flex-initial px-4 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 min-h-[42px] ${
               activeTab === 'register'
                 ? 'bg-red-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -224,17 +224,17 @@ export const BloodBankPage: React.FC = () => {
       {activeTab === 'directory' ? (
         <div className="space-y-8">
           {/* Filter Bar */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
               {/* Search by name/city */}
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search donor name or city..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                  className="w-full min-h-[44px] pl-10 pr-3.5 py-2 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                 />
               </div>
 
@@ -243,7 +243,7 @@ export const BloodBankPage: React.FC = () => {
                 <select
                   value={selectedDistrict}
                   onChange={(e) => setSelectedDistrict(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                  className="w-full min-h-[44px] px-3.5 py-2 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                 >
                   <option value="ALL">All Districts in Nepal</option>
                   {districts.map((d) => (
@@ -259,7 +259,7 @@ export const BloodBankPage: React.FC = () => {
                 <select
                   value={selectedGroup}
                   onChange={(e) => setSelectedGroup(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white font-semibold"
+                  className="w-full min-h-[44px] px-3.5 py-2 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors font-bold text-slate-900"
                 >
                   <option value="ALL">All Blood Groups</option>
                   {bloodGroups.map((g) => (
@@ -271,46 +271,46 @@ export const BloodBankPage: React.FC = () => {
               </div>
 
               {/* Available Only Toggle */}
-              <div className="flex items-center justify-between sm:justify-start gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+              <div className="flex items-center justify-between sm:justify-start gap-2.5 px-3.5 py-2 min-h-[44px] bg-slate-50/70 border border-slate-200 rounded-xl">
                 <label
                   htmlFor="available-toggle"
-                  className="text-xs font-medium text-slate-700 cursor-pointer"
+                  className="text-xs font-semibold text-slate-700 cursor-pointer select-none"
                 >
-                  Available for immediate donation only
+                  Available for donation now
                 </label>
                 <input
                   id="available-toggle"
                   type="checkbox"
                   checked={availableOnly}
                   onChange={(e) => setAvailableOnly(e.target.checked)}
-                  className="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 cursor-pointer"
+                  className="w-4 h-4 text-rose-600 rounded-md border-slate-300 focus:ring-rose-500 cursor-pointer"
                 />
               </div>
             </div>
 
             {/* Blood Group Segmented Quick Buttons */}
-            <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-slate-100">
-              <span className="text-xs text-slate-400 font-semibold uppercase shrink-0 mr-1">
-                Quick Filter:
+            <div className="flex items-center gap-2 overflow-x-auto pt-3 border-t border-slate-100">
+              <span className="text-[11px] font-mono text-slate-400 font-semibold uppercase tracking-wider shrink-0 mr-1">
+                Filter Group:
               </span>
               <button
                 onClick={() => setSelectedGroup('ALL')}
-                className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer shrink-0 ${
+                className={`px-3.5 py-1.5 min-h-[36px] text-xs font-semibold rounded-lg transition-all cursor-pointer shrink-0 ${
                   selectedGroup === 'ALL'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                All
+                All Donors
               </button>
               {bloodGroups.map((group) => (
                 <button
                   key={group}
                   onClick={() => setSelectedGroup(group)}
-                  className={`px-3 py-1 text-xs font-bold rounded-md transition-colors cursor-pointer shrink-0 ${
+                  className={`px-3.5 py-1.5 min-h-[36px] text-xs font-mono font-bold rounded-lg transition-all cursor-pointer shrink-0 ${
                     selectedGroup === group
-                      ? 'bg-red-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      ? 'bg-rose-600 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
                   }`}
                 >
                   {group}
@@ -436,21 +436,21 @@ export const BloodBankPage: React.FC = () => {
           {/* Form Column */}
           <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-xs">
             <div className="mb-6">
-              <span className="text-xs font-semibold text-red-600 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-rose-600 uppercase tracking-wider font-mono">
                 Join the Network
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 font-display">
                 Volunteer Blood Donor Registration
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Your personal details are used strictly to coordinate urgent transfusion needs for patients in Nepal.
+                Your personal details are securely held and used strictly to coordinate urgent transfusion needs for patients in Nepal.
               </p>
             </div>
 
-            <form onSubmit={handleRegisterSubmit} className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleRegisterSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     First Name *
                   </label>
                   <input
@@ -459,11 +459,11 @@ export const BloodBankPage: React.FC = () => {
                     placeholder="e.g. Sangam"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     Last Name *
                   </label>
                   <input
@@ -472,14 +472,14 @@ export const BloodBankPage: React.FC = () => {
                     placeholder="e.g. Pandit"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     Blood Group *
                   </label>
                   <select
@@ -487,7 +487,7 @@ export const BloodBankPage: React.FC = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, bloodGroup: e.target.value as BloodGroup })
                     }
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white font-bold"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors font-bold text-slate-900"
                   >
                     {bloodGroups.map((g) => (
                       <option key={g} value={g}>
@@ -498,7 +498,7 @@ export const BloodBankPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     Gender *
                   </label>
                   <select
@@ -506,7 +506,7 @@ export const BloodBankPage: React.FC = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, gender: e.target.value as Gender })
                     }
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -515,7 +515,7 @@ export const BloodBankPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     Date of Birth *
                   </label>
                   <input
@@ -523,20 +523,20 @@ export const BloodBankPage: React.FC = () => {
                     required
                     value={formData.dob}
                     onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     District *
                   </label>
                   <select
                     value={formData.district}
                     onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                   >
                     {districts.map((d) => (
                       <option key={d} value={d}>
@@ -546,7 +546,7 @@ export const BloodBankPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     City / Municipality *
                   </label>
                   <input
@@ -555,14 +555,14 @@ export const BloodBankPage: React.FC = () => {
                     placeholder="e.g. Birgunj, Parsa"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     Mobile Number (10 digits) *
                   </label>
                   <input
@@ -572,11 +572,11 @@ export const BloodBankPage: React.FC = () => {
                     placeholder="e.g. 9845012345"
                     value={formData.mobile}
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white font-mono"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
                     Email Address (Optional)
                   </label>
                   <input
@@ -584,21 +584,21 @@ export const BloodBankPage: React.FC = () => {
                     placeholder="e.g. donor@nepalhealthsewa.org"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-slate-50/70 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-600 focus:bg-white transition-colors"
                   />
                 </div>
               </div>
 
               <div className="pt-2">
-                <label className="flex items-start gap-2.5 cursor-pointer">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={formData.agreed}
                     onChange={(e) => setFormData({ ...formData, agreed: e.target.checked })}
-                    className="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 cursor-pointer"
+                    className="mt-1 w-4 h-4 text-rose-600 rounded-md border-slate-300 focus:ring-rose-500 cursor-pointer"
                   />
                   <span className="text-xs text-slate-600 leading-relaxed">
-                    I confirm that I meet the basic blood donation eligibility criteria (aged 18–65, weight ≥ 45 kg, no blood donation in past 90 days), and consent to being contacted for voluntary blood emergencies.
+                    I confirm that I meet the basic voluntary donation eligibility criteria (aged 18–65, weight ≥ 45 kg, no blood donation in past 90 days), and consent to being contacted for emergency blood requisitions.
                   </span>
                 </label>
               </div>
@@ -607,7 +607,7 @@ export const BloodBankPage: React.FC = () => {
                 type="submit"
                 variant="primary"
                 size="lg"
-                className="w-full"
+                className="w-full min-h-[48px] text-sm font-bold shadow-sm"
                 isLoading={isRegistering}
               >
                 Register as Voluntary Blood Donor

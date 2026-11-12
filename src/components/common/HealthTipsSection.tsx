@@ -154,11 +154,11 @@ export const HealthTipsSection: React.FC<HealthTipsSectionProps> = ({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full mb-2">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 mb-2">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Preventative Health & Clinical Literacy</span>
+            <span>Preventive Health & Clinical Literacy</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-display">
             {title}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-2xl leading-relaxed">
@@ -212,7 +212,7 @@ export const HealthTipsSection: React.FC<HealthTipsSectionProps> = ({
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-3 py-1.5 rounded-xl font-semibold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-slate-900 text-white shadow-xs'
+                      ? 'bg-rose-600 text-white shadow-xs'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900'
                   }`}
                 >
